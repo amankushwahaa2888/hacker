@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ContextMind – Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#070a15;--surface:#0d0f1e;--card:#12152a;--card2:#161929;--border:rgba(255,255,255,0.07);--purple:#6366f1;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--blue:#3b82f6;--text:#e5e7eb;--muted:#6b7280;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem 1rem;}
+    .phone{width:370px;background:#0b0d1c;border-radius:44px;padding:12px;border:0.5px solid rgba(255,255,255,0.08);box-shadow:0 40px 100px rgba(0,0,0,0.8);}
+    .notch{width:88px;height:22px;background:#0b0d1c;border-radius:0 0 14px 14px;margin:0 auto 8px;}
+    .screen{background:var(--bg);border-radius:34px;overflow:hidden;height:760px;display:flex;flex-direction:column;position:relative;}
+    .scroll-area{flex:1;overflow-y:auto;padding-bottom:72px;}
+    .scroll-area::-webkit-scrollbar{display:none;}
+    .status-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 18px 0;}
+    .s-time{font-family:'Space Mono',monospace;font-size:11px;color:rgba(255,255,255,0.45);}
+    .s-icons{display:flex;gap:5px;align-items:center;}
+
+    /* Hero */
+    .profile-hero{padding:16px 18px 0;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;}
+    .edit-btn{position:absolute;top:16px;right:18px;width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.09);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;}
+    .edit-btn:hover{background:rgba(99,102,241,0.15);}
+.avatar-large {
+    width: 80px;         /* Thoda bada kiya */
+    height: 80px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    position: relative;
+    box-shadow: 0 8px 28px rgba(99,102,241,0.35);
+    overflow: hidden;   
+}
+
+
+.avatar-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;   
+    display: block;
+}
+
+/* Agar aap SVG use kar rahe hain toh ye */
+.avatar-large svg {
+    width: 60%;          /* Is size ko aap apne hisaab se adjust kar sakte hain */
+    height: auto;
+}
+    .avatar-badge{position:absolute;bottom:-4px;right:-4px;width:20px;height:20px;border-radius:7px;background:var(--green);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;}
+    .profile-name{font-size:18px;font-weight:700;color:#fff;margin-bottom:3px;}
+    .profile-handle{font-size:12px;color:var(--purple);}
+    .profile-bio{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.6;}
+    .profile-location{display:flex;align-items:center;gap:5px;font-size:11px;color:#4b5563;margin-top:8px;justify-content:center;}
+
+    /* Quick stats */
+    .quick-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 18px 0;}
+    .qs-item{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:12px;text-align:center;}
+    .qs-num{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;}
+    .qs-label{font-size:9px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:0.4px;}
+
+    /* Badges / achievements */
+    .sec-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px;}
+    .sec-title{font-size:13px;font-weight:600;color:#fff;}
+    .sec-link{font-size:10px;color:var(--purple);cursor:pointer;}
+    .badges-row{display:flex;gap:10px;padding:0 18px;overflow-x:auto;}
+    .badges-row::-webkit-scrollbar{display:none;}
+    .badge-card{flex-shrink:0;width:72px;background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:12px 8px;text-align:center;cursor:pointer;transition:background 0.2s;}
+    .badge-card:hover{background:var(--card2);}
+    .badge-card.earned{border-color:rgba(99,102,241,0.3);}
+    .badge-emoji{font-size:22px;margin-bottom:6px;}
+    .badge-name{font-size:9px;color:var(--muted);line-height:1.4;}
+    .badge-card.earned .badge-name{color:#a5b4fc;}
+    .badge-lock{font-size:12px;opacity:0.2;}
+
+    /* Settings list */
+    .settings-section{margin:0 18px;}
+    .settings-group{background:var(--card);border:0.5px solid var(--border);border-radius:18px;overflow:hidden;margin-bottom:12px;}
+    .setting-item{display:flex;align-items:center;gap:12px;padding:14px;border-bottom:0.5px solid rgba(255,255,255,0.05);cursor:pointer;transition:background 0.18s;}
+    .setting-item:last-child{border-bottom:none;}
+    .setting-item:hover{background:var(--card2);}
+    .si-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .si-info{flex:1;}
+    .si-label{font-size:13px;color:#e5e7eb;}
+    .si-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+    .si-right{font-size:11px;color:#4b5563;display:flex;align-items:center;gap:4px;}
+    .si-arrow{opacity:0.35;}
+
+    /* Toggle switch */
+    .mini-toggle{position:relative;width:36px;height:20px;flex-shrink:0;}
+    .mini-toggle input{opacity:0;width:0;height:0;}
+    .mini-slider{position:absolute;inset:0;cursor:pointer;background:rgba(255,255,255,0.1);border-radius:10px;transition:background 0.25s;}
+    .mini-slider::before{content:'';position:absolute;width:14px;height:14px;border-radius:50%;left:3px;top:3px;background:white;transition:transform 0.25s;}
+    .mini-toggle input:checked + .mini-slider{background:#6366f1;}
+    .mini-toggle input:checked + .mini-slider::before{transform:translateX(16px);}
+
+    /* Logout */
+    .logout-btn{margin:0 18px 16px;width:calc(100% - 36px);padding:13px;border-radius:14px;background:rgba(239,68,68,0.08);border:0.5px solid rgba(239,68,68,0.2);color:#f87171;font-size:13px;font-family:'Sora',sans-serif;font-weight:600;cursor:pointer;transition:background 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .logout-btn:hover{background:rgba(239,68,68,0.15);}
+
+    /* Bottom Nav */
+    .bottom-nav{position:absolute;bottom:0;left:0;right:0;background:rgba(10,12,26,0.97);border-top:0.5px solid rgba(255,255,255,0.07);display:flex;padding:10px 0 16px;border-radius:0 0 34px 34px;z-index:50;}
+    .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;text-decoration:none;}
+    .nav-label{font-size:9px;color:#4b5563;letter-spacing:0.3px;font-family:'Sora',sans-serif;}
+    .nav-item.active .nav-label{color:#6366f1;}
+    .nav-dot{width:4px;height:4px;border-radius:50%;background:#6366f1;margin:0 auto;margin-top:-1px;display:none;}
+    .nav-item.active .nav-dot{display:block;}
+    .toast{position:absolute;bottom:85px;left:50%;transform:translateX(-50%) translateY(30px);background:#1a1d36;border:0.5px solid rgba(99,102,241,0.35);color:#a5b4fc;font-size:11px;padding:8px 18px;border-radius:20px;opacity:0;transition:all 0.3s;white-space:nowrap;z-index:99;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  </style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="screen">
+    <div class="scroll-area">
+
+      <!-- Hero -->
+      <div class="profile-hero">
+        <div class="edit-btn" onclick="showToast('Edit profile coming soon!')">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11 2l3 3-8 8H3v-3l8-8z" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="avatar-large">
+    <img src="logo.png" alt="Logo"> 
+    
+    <div class="avatar-badge">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </div>
+</div>
+        <div class="profile-name" id="profile-name">Rahul Kumar</div>
+        <div class="profile-handle" id="profile-handle">@rahul_kum</div>
+        <div class="profile-bio">Productivity enthusiast 🧠 · Using ContextMind to never miss a task</div>
+        <div class="profile-location">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1C4.34 1 3 2.34 3 4c0 2.5 3 7 3 7s3-4.5 3-7c0-1.66-1.34-3-3-3z" fill="#4b5563"/><circle cx="6" cy="4" r="1.2" fill="#070a15"/></svg>
+          Mathura, Uttar Pradesh
+        </div>
+      </div>
+
+      <!-- Quick stats -->
+      <div class="quick-stats">
+        <div class="qs-item"><div class="qs-num" style="color:#818cf8">42</div><div class="qs-label">Reminders</div></div>
+        <div class="qs-item"><div class="qs-num" style="color:#34d399">5🔥</div><div class="qs-label">Streak</div></div>
+        <div class="qs-item"><div class="qs-num" style="color:#fbbf24">84%</div><div class="qs-label">Rate</div></div>
+      </div>
+
+      <!-- Achievements -->
+      <div class="sec-header"><span class="sec-title">Achievements</span><span class="sec-link" onclick="showToast('All badges coming soon!')">See all</span></div>
+      <div class="badges-row">
+        <div class="badge-card earned" onclick="showToast('🔥 5-day streak achieved!')">
+          <div class="badge-emoji">🔥</div>
+          <div class="badge-name">Streak<br/>Master</div>
+        </div>
+        <div class="badge-card earned" onclick="showToast('📍 Location pro unlocked!')">
+          <div class="badge-emoji">📍</div>
+          <div class="badge-name">Location<br/>Pro</div>
+        </div>
+        <div class="badge-card earned" onclick="showToast('✅ 30 tasks done!')">
+          <div class="badge-emoji">✅</div>
+          <div class="badge-name">Task<br/>Crusher</div>
+        </div>
+        <div class="badge-card" onclick="showToast('Complete 20-day streak to unlock!')">
+          <div class="badge-emoji" style="filter:grayscale(1);opacity:0.3">🏆</div>
+          <div class="badge-lock">🔒</div>
+          <div class="badge-name">20-day<br/>Streak</div>
+        </div>
+        <div class="badge-card" onclick="showToast('Set 100 reminders to unlock!')">
+          <div class="badge-emoji" style="filter:grayscale(1);opacity:0.3">🤖</div>
+          <div class="badge-lock">🔒</div>
+          <div class="badge-name">AI<br/>Guru</div>
+        </div>
+      </div>
+
+      <!-- Settings sections -->
+      <div class="sec-header"><span class="sec-title">Preferences</span></div>
+      <div class="settings-section">
+
+        <!-- Account -->
+        <div class="settings-group">
+          <div class="setting-item" onclick="showToast('Edit profile info coming soon!')">
+            <div class="si-icon" style="background:rgba(99,102,241,0.12)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="#818cf8" stroke-width="1.2"/><path d="M2 13.5c0-3 2.686-5 6-5s6 2 6 5" stroke="#818cf8" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+            <div class="si-info"><div class="si-label">Personal Info</div><div class="si-sub">Name, email, phone</div></div>
+            <div class="si-right"><svg class="si-arrow" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 12l4-4-4-4" stroke="white" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+          </div>
+          <div class="setting-item" onclick="showToast('Change password coming soon!')">
+            <div class="si-icon" style="background:rgba(16,185,129,0.12)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="#10b981" stroke-width="1.2"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="#10b981" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+            <div class="si-info"><div class="si-label">Password & Security</div><div class="si-sub">Last changed 3 days ago</div></div>
+            <div class="si-right"><svg class="si-arrow" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 12l4-4-4-4" stroke="white" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="settings-group">
+          <div class="setting-item">
+            <div class="si-icon" style="background:rgba(245,158,11,0.12)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 7A5 5 0 003 7c0 5.5-2 7-2 7h14s-2-1.5-2-7M9.73 14a2 2 0 01-3.46 0" stroke="#f59e0b" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+            <div class="si-info"><div class="si-label">Push Notifications</div><div class="si-sub">Smart alerts enabled</div></div>
+            <label class="mini-toggle"><input type="checkbox" checked/><span class="mini-slider"></span></label>
+          </div>
+          <div class="setting-item">
+            <div class="si-icon" style="background:rgba(99,102,241,0.12)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.52 1.5 3.5 3.52 3.5 6c0 3.75 4.5 8.5 4.5 8.5s4.5-4.75 4.5-8.5c0-2.48-2.02-4.5-4.5-4.5z" stroke="#818cf8" stroke-width="1.2"/><circle cx="8" cy="6" r="1.5" stroke="#818cf8" stroke-width="1.1"/></svg></div>
+            <div class="si-info"><div class="si-label">Location Access</div><div class="si-sub">Always on</div></div>
+            <label class="mini-toggle"><input type="checkbox" checked/><span class="mini-slider"></span></label>
+          </div>
+          <div class="setting-item">
+            <div class="si-icon" style="background:rgba(16,185,129,0.12)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h3l2-5 4 10 2-5h3" stroke="#10b981" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="si-info"><div class="si-label">Activity Detection</div><div class="si-sub">Walking, driving, idle</div></div>
+            <label class="mini-toggle"><input type="checkbox"/><span class="mini-slider"></span></label>
+          </div>
+          <div class="setting-item">
+            <div class="si-icon" style="background:rgba(59,130,246,0.1)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#3b82f6" stroke-width="1.2"/><path d="M5 8h6M8 5v6" stroke="#3b82f6" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+            <div class="si-info"><div class="si-label">AI Suggestions</div><div class="si-sub">Predictive reminders</div></div>
+            <label class="mini-toggle"><input type="checkbox" checked/><span class="mini-slider"></span></label>
+          </div>
+        </div>
+
+        <!-- App -->
+        <div class="settings-group">
+          <div class="setting-item" onclick="showToast('Dark theme active!')">
+            <div class="si-icon" style="background:rgba(124,58,237,0.12)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.5 9A5.5 5.5 0 017 2.5a5.5 5.5 0 000 11 5.5 5.5 0 006.5-4.5z" stroke="#a78bfa" stroke-width="1.2"/></svg></div>
+            <div class="si-info"><div class="si-label">Theme</div><div class="si-sub">Dark mode</div></div>
+            <div class="si-right" style="color:#a78bfa">Dark <svg class="si-arrow" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 12l4-4-4-4" stroke="white" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+          </div>
+          <div class="setting-item" onclick="showToast('Language settings coming soon!')">
+            <div class="si-icon" style="background:rgba(16,185,129,0.12)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#10b981" stroke-width="1.2"/><path d="M8 2c0 0-3 2-3 6s3 6 3 6M8 2c0 0 3 2 3 6s-3 6-3 6M2 8h12" stroke="#10b981" stroke-width="1.1"/></svg></div>
+            <div class="si-info"><div class="si-label">Language</div><div class="si-sub">English (India)</div></div>
+            <div class="si-right">EN <svg class="si-arrow" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 12l4-4-4-4" stroke="white" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+          </div>
+          <div class="setting-item" onclick="showToast('Privacy policy opening soon!')">
+            <div class="si-icon" style="background:rgba(245,158,11,0.1)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L3 4v4c0 3.5 2.5 5.5 5 6.5C11 13.5 13 11.5 13 8V4L8 2z" stroke="#f59e0b" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+            <div class="si-info"><div class="si-label">Privacy & Data</div><div class="si-sub">On-device only</div></div>
+            <div class="si-right"><svg class="si-arrow" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 12l4-4-4-4" stroke="white" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+          </div>
+          <div class="setting-item" onclick="showToast('Help center coming soon!')">
+            <div class="si-icon" style="background:rgba(99,102,241,0.1)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#818cf8" stroke-width="1.2"/><path d="M6 6.5a2 2 0 113.98.33C9.8 7.9 8 8.5 8 9.5" stroke="#818cf8" stroke-width="1.2" stroke-linecap="round"/><circle cx="8" cy="11.5" r="0.7" fill="#818cf8"/></svg></div>
+            <div class="si-info"><div class="si-label">Help & Support</div><div class="si-sub">FAQs, contact us</div></div>
+            <div class="si-right"><svg class="si-arrow" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 12l4-4-4-4" stroke="white" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+          </div>
+        </div>
+
+        <!-- App version -->
+        <div style="text-align:center;padding:4px 0 14px;font-size:10px;color:#2d3748;">
+          ContextMind v1.0.0 · Build 2026
+        </div>
+      </div>
+
+      <!-- Logout -->
+      <button class="logout-btn" onclick="handleLogout()">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M11 11l3-3-3-3M14 8H6" stroke="#f87171" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Sign Out
+      </button>
+
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+      <a class="nav-item" href="dashboard.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round"/></svg><span class="nav-label">Home</span><div class="nav-dot"></div></a>
+      <a class="nav-item" href="alerts.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round"/></svg><span class="nav-label">Alerts</span><div class="nav-dot"></div></a>
+      <a class="nav-item" href="map.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="2" x2="8" y2="18" stroke="rgba(255,255,255,0.28)" stroke-width="1.5"/><line x1="16" y1="6" x2="16" y2="22" stroke="rgba(255,255,255,0.28)" stroke-width="1.5"/></svg><span class="nav-label">Map</span><div class="nav-dot"></div></a>
+      <a class="nav-item" href="stats.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><line x1="18" y1="20" x2="18" y2="10" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round"/><line x1="12" y1="20" x2="12" y2="4" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round"/><line x1="6" y1="20" x2="6" y2="14" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round"/></svg><span class="nav-label">Stats</span><div class="nav-dot"></div></a>
+      <a class="nav-item active" href="profile.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#6366f1" stroke-width="1.5"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round"/></svg><span class="nav-label" style="color:#6366f1">Profile</span><div class="nav-dot"></div></a>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+<script>
+  
+  function updateClock(){var n=new Date(),h=n.getHours().toString().padStart(2,'0'),m=n.getMinutes().toString().padStart(2,'0');document.getElementById('clock').textContent=h+':'+m;}
+  updateClock();setInterval(updateClock,1000);
+  function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+  function handleLogout(){
+    if(confirm('Are you sure you want to sign out?')){
+      window.location.href='login.html';
+    }
+  }
+
+    // ── Dynamic Name from localStorage ──
+    (function() {
+      var name   = localStorage.getItem('userName')   || 'Rahul Kumar';
+      var handle = localStorage.getItem('userHandle') || 'rahul_kum';
+      var el = document.getElementById('profile-name');
+      var hel = document.getElementById('profile-handle');
+      if (el)  el.textContent  = name;
+      if (hel) hel.textContent = '@' + handle.replace('@','');
+    })();
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Smart Map Alert</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:#070a15;
+}
+
+.container{
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+#map{
+  height:50%;
+}
+
+#nearby{
+  height:50%;
+  background:#0b0d1c;
+  overflow-y:auto;
+  padding:12px;
+  color:white;
+}
+
+#placeList{
+  list-style:none;
+  padding:0;
+}
+
+#placeList li{
+  background:#1a1d36;
+  margin-bottom:10px;
+  padding:12px;
+  border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div id="map"></div>
+
+  <div id="nearby">
+    <h3>📍 Nearby Places</h3>
+    <ul id="placeList"></ul>
+  </div>
+</div>
+
+<script>
+
+let map = L.map('map').setView([28.6139,77.2090],13);
+let marker;
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  attribution:'© OpenStreetMap'
+}).addTo(map);
+
+setTimeout(()=>map.invalidateSize(),200);
+
+// 📍 LIVE LOCATION
+navigator.geolocation.watchPosition(pos=>{
+
+  let lat = pos.coords.latitude;
+  let lng = pos.coords.longitude;
+
+  map.setView([lat,lng],15);
+
+  if(marker){
+    marker.setLatLng([lat,lng]);
+  } else {
+    marker = L.marker([lat,lng]).addTo(map);
+  }
+
+  checkNearby(lat,lng);
+
+});
+
+// 📏 DISTANCE
+function getDistance(lat1, lon1, lat2, lon2){
+  let R = 6371e3;
+  let φ1 = lat1*Math.PI/180;
+  let φ2 = lat2*Math.PI/180;
+  let Δφ = (lat2-lat1)*Math.PI/180;
+  let Δλ = (lon2-lon1)*Math.PI/180;
+
+  let a = Math.sin(Δφ/2)**2 +
+          Math.cos(φ1)*Math.cos(φ2) *
+          Math.sin(Δλ/2)**2;
+
+  return R * (2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+}
+
+// 🔥 FINAL WORKING LOGIC
+async function checkNearby(lat, lng){
+
+  let list = document.getElementById("placeList");
+  list.innerHTML = "<li>Loading...</li>";
+
+  const query = `
+  [out:json];
+  (
+    node["amenity"="hospital"](around:5000,${lat},${lng});
+    node["amenity"="pharmacy"](around:5000,${lat},${lng});
+    node["amenity"="restaurant"](around:5000,${lat},${lng});
+    node["shop"="supermarket"](around:5000,${lat},${lng});
+  );
+  out;
+  `;
+
+  try{
+    const res = await fetch(
+      "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query)
+    );
+
+    const data = await res.json();
+
+    if(!data.elements || data.elements.length === 0){
+      list.innerHTML = "<li>No places found</li>";
+      return;
+    }
+
+    let places = data.elements.map(el => {
+
+      let dist = getDistance(lat,lng,el.lat,el.lon);
+
+      let icon = "📍";
+      let type = el.tags?.amenity || el.tags?.shop;
+
+      if(type === "hospital") icon = "🏥";
+      if(type === "pharmacy") icon = "💊";
+      if(type === "restaurant") icon = "🍽️";
+      if(type === "supermarket") icon = "🛒";
+
+      return {
+        name: el.tags?.name || "Unnamed",
+        distance: dist,
+        icon
+      };
+
+    });
+
+    // SORT
+    places.sort((a,b)=>a.distance-b.distance);
+
+    list.innerHTML = "";
+
+    // FIRST TRY 500m
+    let near = places.filter(p=>p.distance<=500);
+
+    if(near.length>0){
+
+      near.slice(0,10).forEach(p=>{
+        let li = document.createElement("li");
+        li.innerText = `${p.icon} ${p.name} - ${Math.round(p.distance)}m`;
+        list.appendChild(li);
+      });
+
+    } else {
+
+      // FALLBACK
+      let note = document.createElement("li");
+      note.innerText = "No places within 500m, showing nearest:";
+      list.appendChild(note);
+
+      places.slice(0,10).forEach(p=>{
+        let li = document.createElement("li");
+        li.innerText = `${p.icon} ${p.name} - ${Math.round(p.distance)}m`;
+        list.appendChild(li);
+      });
+
+    }
+
+  } catch(err){
+    console.log(err);
+    list.innerHTML = "<li>Error loading places</li>";
+  }
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ContextMind – Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:       #070a15;
+      --surface:  #0d0f1e;
+      --card:     #12152a;
+      --card2:    #161929;
+      --border:   rgba(255,255,255,0.07);
+      --purple:   #6366f1;
+      --violet:   #7c3aed;
+      --green:    #10b981;
+      --amber:    #f59e0b;
+      --red:      #ef4444;
+      --blue:     #3b82f6;
+      --text:     #e5e7eb;
+      --muted:    #6b7280;
+      --soft:     #9ca3af;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem;
+    }
+
+    /* Phone shell */
+    .phone {
+      width: 370px;
+      background: #0b0d1c;
+      border-radius: 44px;
+      padding: 12px;
+      border: 0.5px solid rgba(255,255,255,0.08);
+      box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+    }
+    .notch {
+      width: 88px; height: 22px;
+      background: #0b0d1c;
+      border-radius: 0 0 14px 14px;
+      margin: 0 auto 8px;
+    }
+    .screen {
+      background: var(--bg);
+      border-radius: 34px;
+      overflow: hidden;
+      height: 760px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Scrollable content */
+    .scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 70px;
+    }
+    .scroll-area::-webkit-scrollbar { display: none; }
+
+    /* ── Status bar ── */
+    .status-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 18px 0;
+      flex-shrink: 0;
+    }
+    .s-time { font-family:'Space Mono',monospace; font-size:11px; color:rgba(255,255,255,0.45); }
+    .s-icons { display:flex; gap:5px; align-items:center; }
+
+    /* ── Top header ── */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 18px 0;
+      flex-shrink: 0;
+    }
+    .header-left {}
+    .greeting { font-size: 11px; color: var(--muted); }
+    .username  { font-size: 17px; font-weight: 600; color: #fff; margin-top: 1px; }
+    .avatar {
+      width: 40px; height: 40px; border-radius: 14px;
+      background: linear-gradient(135deg,#4f46e5,#7c3aed);
+      display: flex; align-items: center; justify-content: center;
+      font-family:'Space Mono',monospace; font-size:13px; font-weight:700; color:#fff;
+      position: relative;
+    }
+    .avatar-badge {
+      position: absolute; top: -3px; right: -3px;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--green); border: 2px solid var(--bg);
+    }
+
+    /* ── Context pill ── */
+    .ctx-pill {
+      margin: 14px 18px 0;
+      background: rgba(99,102,241,0.08);
+      border: 0.5px solid rgba(99,102,241,0.2);
+      border-radius: 30px;
+      padding: 8px 14px;
+      display: flex; align-items: center; gap: 8px;
+      animation: fadeSlide 0.5s ease;
+    }
+    @keyframes fadeSlide { from{ opacity:0; transform:translateY(-6px);} to{opacity:1;transform:translateY(0);} }
+    .ctx-dot { width:7px; height:7px; border-radius:50%; background:var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,0.5);} 50%{box-shadow:0 0 0 5px rgba(16,185,129,0);} }
+    .ctx-text { font-size:11px; color:#a5b4fc; flex:1; }
+    .ctx-icon { opacity:0.5; }
+
+    /* ── Stat cards ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 8px;
+      margin: 14px 18px 0;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 10px;
+      text-align: center;
+    }
+    .stat-num { font-family:'Space Mono',monospace; font-size:18px; font-weight:700; }
+    .stat-num.purple { color: #818cf8; }
+    .stat-num.green  { color: var(--green); }
+    .stat-num.amber  { color: var(--amber); }
+    .stat-label { font-size:9px; color:var(--muted); margin-top:3px; letter-spacing:0.5px; text-transform:uppercase; }
+
+    /* ── Section header ── */
+    .sec-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 18px 8px;
+    }
+    .sec-title { font-size:13px; font-weight:600; color:#fff; }
+    .sec-link  { font-size:10px; color:var(--purple); cursor:pointer; }
+
+    /* ── Reminder cards ── */
+    .reminder-card {
+      margin: 0 18px 10px;
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      display: flex; align-items: center; gap: 12px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      animation: fadeSlide 0.4s ease both;
+    }
+    .reminder-card:hover { background: var(--card2); transform: translateX(2px); }
+    .reminder-card:nth-child(1){ animation-delay:0.05s; }
+    .reminder-card:nth-child(2){ animation-delay:0.1s; }
+    .reminder-card:nth-child(3){ animation-delay:0.15s; }
+
+    .r-icon {
+      width: 42px; height: 42px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .r-icon-loc   { background: rgba(16,185,129,0.12); }
+    .r-icon-time  { background: rgba(99,102,241,0.12); }
+    .r-icon-act   { background: rgba(245,158,11,0.12); }
+    .r-icon-ai    { background: rgba(59,130,246,0.12); }
+
+    .r-info { flex: 1; min-width: 0; }
+    .r-title { font-size:13px; font-weight:500; color:#e5e7eb; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .r-sub   { font-size:10px; color:var(--muted); margin-top:3px; display:flex; align-items:center; gap:5px; }
+    .r-badge {
+      font-size:9px; padding:2px 8px; border-radius:10px; font-weight:500;
+    }
+    .badge-loc  { background:rgba(16,185,129,0.12); color:#34d399; }
+    .badge-time { background:rgba(99,102,241,0.12);  color:#818cf8; }
+    .badge-act  { background:rgba(245,158,11,0.12);  color:#fbbf24; }
+    .badge-ai   { background:rgba(59,130,246,0.12);  color:#60a5fa; }
+
+    .r-right { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+    .r-time  { font-size:10px; color:var(--muted); }
+
+    /* Toggle */
+    .mini-toggle { position:relative; width:32px; height:18px; }
+    .mini-toggle input { opacity:0; width:0; height:0; }
+    .mini-slider {
+      position:absolute; inset:0; cursor:pointer;
+      background:rgba(255,255,255,0.1); border-radius:9px; transition:background 0.25s;
+    }
+    .mini-slider::before {
+      content:''; position:absolute;
+      width:12px; height:12px; border-radius:50%;
+      left:3px; top:3px; background:white; transition:transform 0.25s;
+    }
+    .mini-toggle input:checked + .mini-slider { background:#6366f1; }
+    .mini-toggle input:checked + .mini-slider::before { transform:translateX(14px); }
+
+    /* ── AI Suggestion card ── */
+    .ai-card {
+      margin: 0 18px 10px;
+      background: linear-gradient(135deg, rgba(79,70,229,0.15) 0%, rgba(124,58,237,0.1) 100%);
+      border: 0.5px solid rgba(99,102,241,0.25);
+      border-radius: 18px;
+      padding: 14px;
+      animation: fadeSlide 0.5s ease 0.2s both;
+    }
+    .ai-header { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+    .ai-label  { font-size:10px; color:#818cf8; letter-spacing:1px; text-transform:uppercase; font-weight:600; }
+    .ai-body   { font-size:12px; color:#c7d2fe; line-height:1.6; }
+    .ai-actions { display:flex; gap:8px; margin-top:12px; }
+    .ai-btn {
+      flex:1; padding:8px; border-radius:10px; font-size:11px;
+      font-family:'Sora',sans-serif; cursor:pointer; transition:all 0.2s;
+      text-align:center;
+    }
+    .ai-btn-accept {
+      background:rgba(99,102,241,0.2); border:0.5px solid rgba(99,102,241,0.4); color:#a5b4fc;
+    }
+    .ai-btn-accept:hover { background:rgba(99,102,241,0.3); }
+    .ai-btn-skip {
+      background:transparent; border:0.5px solid rgba(255,255,255,0.08); color:var(--muted);
+    }
+    .ai-btn-skip:hover { border-color:rgba(255,255,255,0.18); color:var(--soft); }
+
+    /* ── Map preview ── */
+    .map-card {
+      margin: 0 18px 10px;
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      animation: fadeSlide 0.5s ease 0.25s both;
+    }
+    .map-preview {
+      height: 110px;
+      background: #0e1628;
+      position: relative;
+      overflow: hidden;
+    }
+    /* SVG map grid */
+    .map-grid {
+      position:absolute; inset:0;
+      opacity: 0.3;
+    }
+    .map-pin {
+      position:absolute;
+      top:38%; left:52%;
+      transform:translate(-50%,-50%);
+    }
+    .map-ripple {
+      position:absolute;
+      top:38%; left:52%;
+      transform:translate(-50%,-50%);
+      width:40px; height:40px;
+      border-radius:50%;
+      border:1.5px solid rgba(16,185,129,0.4);
+      animation:ripple 2s infinite;
+    }
+    .map-ripple2 { animation-delay:0.8s; }
+    @keyframes ripple {
+      0%  { transform:translate(-50%,-50%) scale(0.5); opacity:0.8; }
+      100%{ transform:translate(-50%,-50%) scale(2.5); opacity:0; }
+    }
+    .map-footer { padding:10px 14px; display:flex; align-items:center; justify-content:space-between; }
+    .map-loc-name { font-size:12px; color:#e5e7eb; font-weight:500; }
+    .map-loc-sub  { font-size:10px; color:var(--muted); }
+    .map-dist { font-size:11px; color:var(--green); font-family:'Space Mono',monospace; }
+
+    /* ── Habit tracker ── */
+    .habit-card {
+      margin: 0 18px 10px;
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      animation: fadeSlide 0.5s ease 0.3s both;
+    }
+    .habit-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .habit-title  { font-size:12px; font-weight:600; color:#e5e7eb; }
+    .habit-sub    { font-size:10px; color:var(--muted); }
+    .habit-dots   { display:flex; gap:5px; }
+    .h-dot {
+      width:28px; height:28px; border-radius:9px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:9px; font-weight:600; letter-spacing:0.3px;
+    }
+    .h-done  { background:rgba(16,185,129,0.15); color:#34d399; border:0.5px solid rgba(16,185,129,0.25); }
+    .h-miss  { background:rgba(239,68,68,0.1);   color:#f87171; border:0.5px solid rgba(239,68,68,0.2); }
+    .h-today { background:rgba(99,102,241,0.15);  color:#a5b4fc; border:0.5px solid rgba(99,102,241,0.3); }
+    .h-blank { background:rgba(255,255,255,0.04); color:var(--muted); border:0.5px solid var(--border); }
+    .habit-streak { margin-top:10px; display:flex; align-items:center; gap:8px; }
+    .streak-bar-wrap { flex:1; height:4px; background:rgba(255,255,255,0.07); border-radius:2px; overflow:hidden; }
+    .streak-bar { height:100%; border-radius:2px; background:linear-gradient(90deg,#6366f1,#10b981); width:65%; }
+    .streak-text { font-size:10px; color:var(--muted); }
+
+    /* ── Completion ring ── */
+    .ring-row {
+      display:flex; gap:10px; margin: 0 18px 10px;
+    }
+    .ring-card {
+      flex:1; background:var(--card); border:0.5px solid var(--border); border-radius:18px;
+      padding:14px; text-align:center;
+      animation: fadeSlide 0.5s ease 0.35s both;
+    }
+    .ring-wrap { position:relative; width:64px; height:64px; margin:0 auto 8px; }
+    .ring-svg  { transform:rotate(-90deg); }
+    .ring-bg   { fill:none; stroke:rgba(255,255,255,0.06); stroke-width:6; }
+    .ring-fg   { fill:none; stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 1s ease; }
+    .ring-label { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-family:'Space Mono',monospace; font-size:13px; font-weight:700; }
+    .ring-name { font-size:10px; color:var(--muted); }
+
+    /* ── Bottom nav ── */
+    .bottom-nav {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(13,15,30,0.95);
+      border-top: 0.5px solid var(--border);
+      backdrop-filter: blur(10px);
+      display: flex; padding: 10px 0 14px;
+      border-radius: 0 0 34px 34px;
+    }
+    .nav-item {
+      flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;
+      cursor:pointer; transition:opacity 0.2s;
+    }
+    .nav-item:hover { opacity:0.75; }
+    .nav-icon { width:22px; height:22px; }
+    .nav-label { font-size:9px; color:var(--muted); letter-spacing:0.3px; }
+    .nav-item.active .nav-label { color: var(--purple); }
+    .nav-dot { width:4px; height:4px; border-radius:50%; background:var(--purple); margin:0 auto; margin-top:-2px; }
+
+    /* ── FAB ── */
+    .fab {
+      position:absolute; bottom:76px; right:18px;
+      width:48px; height:48px; border-radius:16px;
+      background:linear-gradient(135deg,#4f46e5,#7c3aed);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; box-shadow:0 8px 24px rgba(99,102,241,0.4);
+      transition:transform 0.2s;
+      z-index:10;
+    }
+    .fab:hover { transform:scale(1.08); }
+    .fab:active{ transform:scale(0.95); }
+
+    /* ── Add reminder modal ── */
+    .modal-overlay {
+      position:absolute; inset:0; background:rgba(0,0,0,0.6);
+      display:flex; align-items:flex-end; border-radius:34px;
+      opacity:0; pointer-events:none; transition:opacity 0.25s;
+      z-index:20;
+    }
+    .modal-overlay.open { opacity:1; pointer-events:all; }
+    .modal-sheet {
+      width:100%; background:var(--surface);
+      border-radius:24px 24px 34px 34px;
+      padding:20px 20px 32px;
+      transform:translateY(100%);
+      transition:transform 0.3s ease;
+      border-top:0.5px solid rgba(255,255,255,0.08);
+    }
+    .modal-overlay.open .modal-sheet { transform:translateY(0); }
+    .modal-handle { width:36px; height:4px; border-radius:2px; background:rgba(255,255,255,0.12); margin:0 auto 16px; }
+    .modal-title { font-size:14px; font-weight:600; color:#fff; margin-bottom:14px; }
+    .m-input-wrap { position:relative; margin-bottom:11px; }
+    .m-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); width:14px; height:14px; opacity:0.35; pointer-events:none; }
+    .m-field {
+      width:100%; background:rgba(255,255,255,0.05);
+      border:0.5px solid rgba(255,255,255,0.09);
+      border-radius:12px; padding:11px 12px 11px 36px;
+      color:#e5e7eb; font-size:12px; font-family:'Sora',sans-serif;
+      outline:none;
+    }
+    .m-field:focus { border-color:rgba(99,102,241,0.5); background:rgba(99,102,241,0.06); }
+    .m-field::placeholder { color:#4b5563; }
+    .trigger-row { display:flex; gap:7px; margin-bottom:14px; flex-wrap:wrap; }
+    .trigger-chip {
+      padding:6px 12px; border-radius:20px; font-size:10px; cursor:pointer;
+      border:0.5px solid rgba(255,255,255,0.08); color:var(--muted);
+      background:rgba(255,255,255,0.04); transition:all 0.2s;
+    }
+    .trigger-chip.sel { background:rgba(99,102,241,0.15); border-color:rgba(99,102,241,0.4); color:#a5b4fc; }
+    .m-btn {
+      width:100%; padding:12px; border-radius:12px;
+      background:linear-gradient(135deg,#4f46e5,#7c3aed);
+      border:none; color:#fff; font-size:13px;
+      font-family:'Sora',sans-serif; font-weight:600;
+      cursor:pointer; transition:opacity 0.2s;
+    }
+    .m-btn:hover { opacity:0.88; }
+
+    /* Toast */
+    .toast {
+      position:absolute; bottom:85px; left:50%;
+      transform:translateX(-50%) translateY(30px);
+      background:#1a1d36; border:0.5px solid rgba(99,102,241,0.35);
+      color:#a5b4fc; font-size:11px; padding:8px 18px;
+      border-radius:20px; opacity:0; transition:all 0.3s;
+      white-space:nowrap; z-index:30; pointer-events:none;
+    }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="screen">
+
+    <!-- Scrollable content -->
+    <div class="scroll-area" id="scrollArea">
+
+      
+      <!-- Header -->
+      <div class="header">
+        <div class="header-left">
+          <p class="greeting" id="greeting-text"><h3>Good morning👋</h3></p>
+        </div>
+        <div class="avatar">RK<div class="avatar-badge"></div></div>
+      </div>
+
+      <!-- Context pill -->
+      <div class="ctx-pill">
+        <div class="ctx-dot"></div>
+        <span class="ctx-text" id="ctx-text">📍 Near Reliance Fresh, Mathura • 3 reminders active</span>
+        <svg class="ctx-icon" width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <path d="M6 12l4-4-4-4" stroke="#a5b4fc" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-num purple" id="stat-total">8</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num green" id="stat-done">5</div>
+          <div class="stat-label">Done</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num amber" id="stat-pending">3</div>
+          <div class="stat-label">Pending</div>
+        </div>
+      </div>
+
+      <!-- Today's reminders -->
+      <div class="sec-header">
+        <span class="sec-title">Today's Reminders</span>
+        <span class="sec-link" onclick="showToast('All reminders page coming soon!')">See all</span>
+      </div>
+
+      <!-- Reminder 1 -->
+      <div class="reminder-card" id="rc1">
+        <div class="r-icon r-icon-loc">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 2C7.24 2 5 4.24 5 7c0 4.25 5 11 5 11s5-6.75 5-11c0-2.76-2.24-5-5-5z" fill="#10b981" opacity="0.9"/>
+            <circle cx="10" cy="7" r="2" fill="#0d0f1e"/>
+          </svg>
+        </div>
+        <div class="r-info">
+          <div class="r-title">Buy Groceries</div>
+          <div class="r-sub">
+            <span class="r-badge badge-loc">Location</span>
+            Near D-Mart
+          </div>
+        </div>
+        <div class="r-right">
+          <span class="r-time">~200m</span>
+          <label class="mini-toggle">
+            <input type="checkbox" checked onchange="toggleReminder(this,'rc1')"/>
+            <span class="mini-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Reminder 2 -->
+      <div class="reminder-card" id="rc2">
+        <div class="r-icon r-icon-time">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="7.5" stroke="#6366f1" stroke-width="1.5"/>
+            <path d="M10 6v4.5l3 1.5" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="r-info">
+          <div class="r-title">Call Mom</div>
+          <div class="r-sub">
+            <span class="r-badge badge-time">Time</span>
+            6:00 PM
+          </div>
+        </div>
+        <div class="r-right">
+          <span class="r-time">5h left</span>
+          <label class="mini-toggle">
+            <input type="checkbox" checked onchange="toggleReminder(this,'rc2')"/>
+            <span class="mini-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Reminder 3 -->
+      <div class="reminder-card" id="rc3">
+        <div class="r-icon r-icon-act">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M3 10h3l2-5 4 10 2-5h3" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="r-info">
+          <div class="r-title">Take Medicine</div>
+          <div class="r-sub">
+            <span class="r-badge badge-act">Activity</span>
+            After breakfast
+          </div>
+        </div>
+        <div class="r-right">
+          <span class="r-time">9:30 AM</span>
+          <label class="mini-toggle">
+            <input type="checkbox" onchange="toggleReminder(this,'rc3')"/>
+            <span class="mini-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Reminder 4 -->
+      <div class="reminder-card" id="rc4">
+        <div class="r-icon r-icon-ai">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="7" stroke="#3b82f6" stroke-width="1.3"/>
+            <path d="M7 10h6M10 7v6" stroke="#3b82f6" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="r-info">
+          <div class="r-title">Team Meeting Prep</div>
+          <div class="r-sub">
+            <span class="r-badge badge-ai">AI</span>
+            Before 3 PM meeting
+          </div>
+        </div>
+        <div class="r-right">
+          <span class="r-time">2:30 PM</span>
+          <label class="mini-toggle">
+            <input type="checkbox" checked onchange="toggleReminder(this,'rc4')"/>
+            <span class="mini-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- AI Suggestion -->
+      <div class="sec-header">
+        <span class="sec-title">AI Suggestion</span>
+        <span class="sec-link">✨ Smart</span>
+      </div>
+
+      <div class="ai-card">
+        <div class="ai-header">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="6.5" stroke="#818cf8" stroke-width="1.2"/>
+            <path d="M5 8h6M8 5v6" stroke="#818cf8" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          <span class="ai-label">ContextMind AI</span>
+        </div>
+        <p class="ai-body">
+          You usually stop at <strong style="color:#a5b4fc">Petrol Pump</strong> on Tuesdays.
+          Want me to remind you to <strong style="color:#a5b4fc">check tyre pressure</strong> when you're nearby today?
+        </p>
+        <div class="ai-actions">
+          <div class="ai-btn ai-btn-accept" onclick="acceptAI()">✓ Add Reminder</div>
+          <div class="ai-btn ai-btn-skip"   onclick="skipAI()">Skip</div>
+        </div>
+      </div>
+
+      <!-- Location map preview -->
+      <div class="sec-header">
+        <span class="sec-title">Nearby Triggers</span>
+        <span class="sec-link" onclick="showToast('Map view coming soon!')">Open Map</span>
+        <!-- FONTS -->
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <!-- LEAFLET (FREE MAP) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+      </div>
+
+      <div class="map-card">
+        <div class="map-preview">
+          <!-- Map grid SVG -->
+          <svg class="map-grid" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+                <path d="M 28 0 L 0 0 0 28" fill="none" stroke="rgba(99,102,241,0.3)" stroke-width="0.5"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)"/>
+            <!-- Roads -->
+            <line x1="0" y1="55" x2="100%" y2="55" stroke="rgba(255,255,255,0.07)" stroke-width="8"/>
+            <line x1="160" y1="0" x2="160" y2="100%" stroke="rgba(255,255,255,0.05)" stroke-width="6"/>
+            <!-- Blocks -->
+            <rect x="20" y="15" width="50" height="32" rx="3" fill="rgba(99,102,241,0.08)" stroke="rgba(99,102,241,0.15)" stroke-width="0.5"/>
+            <rect x="85" y="15" width="60" height="32" rx="3" fill="rgba(16,185,129,0.07)" stroke="rgba(16,185,129,0.12)" stroke-width="0.5"/>
+            <rect x="185" y="15" width="45" height="32" rx="3" fill="rgba(245,158,11,0.07)" stroke="rgba(245,158,11,0.12)" stroke-width="0.5"/>
+            <rect x="20" y="68" width="70" height="30" rx="3" fill="rgba(59,130,246,0.07)" stroke="rgba(59,130,246,0.12)" stroke-width="0.5"/>
+            <rect x="110" y="68" width="80" height="30" rx="3" fill="rgba(99,102,241,0.06)" stroke="rgba(99,102,241,0.1)" stroke-width="0.5"/>
+          </svg>
+          <!-- Ripples -->
+          <div class="map-ripple"></div>
+          <div class="map-ripple map-ripple2"></div>
+          <!-- Pin -->
+          <div class="map-pin">
+            <svg width="22" height="28" viewBox="0 0 22 28" fill="none">
+              <path d="M11 0C5 0 0 5 0 11c0 8 11 17 11 17S22 19 22 11C22 5 17 0 11 0z" fill="#10b981"/>
+              <circle cx="11" cy="11" r="4" fill="#0d0f1e"/>
+            </svg>
+          </div>
+        </div>
+        <div class="map-footer">
+          <div>
+            <div class="map-loc-name">You are here</div>
+            <div class="map-loc-sub">Mathura, UP • 2 triggers nearby</div>
+          </div>
+          <div class="map-dist">~180m</div>
+        </div>
+      </div>
+
+      <!-- Habit tracker -->
+      <div class="sec-header">
+        <span class="sec-title">This Week's Habits</span>
+        <span class="sec-link">Details</span>
+      </div>
+
+      <div class="habit-card">
+        <div class="habit-header">
+          <div>
+            <div class="habit-title">Morning Walk</div>
+            <div class="habit-sub">5 day streak 🔥</div>
+          </div>
+          <div class="habit-dots">
+            <div class="h-dot h-done">M</div>
+            <div class="h-dot h-done">T</div>
+            <div class="h-dot h-done">W</div>
+            <div class="h-dot h-miss">T</div>
+            <div class="h-dot h-done">F</div>
+            <div class="h-dot h-today">Sa</div>
+            <div class="h-dot h-blank">Su</div>
+          </div>
+        </div>
+        <div class="habit-streak">
+          <div class="streak-bar-wrap"><div class="streak-bar"></div></div>
+          <span class="streak-text">65% this week</span>
+        </div>
+      </div>
+
+      <!-- Completion rings -->
+      <div class="sec-header">
+        <span class="sec-title">Completion</span>
+        <span class="sec-link">Report</span>
+      </div>
+
+      <div class="ring-row">
+        <div class="ring-card">
+          <div class="ring-wrap">
+            <svg class="ring-svg" width="64" height="64" viewBox="0 0 64 64">
+              <circle class="ring-bg" cx="32" cy="32" r="27"/>
+              <circle class="ring-fg" cx="32" cy="32" r="27"
+                stroke="#6366f1"
+                stroke-dasharray="169.6"
+                stroke-dashoffset="59.4"/>
+            </svg>
+            <span class="ring-label" style="color:#818cf8">65%</span>
+          </div>
+          <div class="ring-name">Today</div>
+        </div>
+        <div class="ring-card">
+          <div class="ring-wrap">
+            <svg class="ring-svg" width="64" height="64" viewBox="0 0 64 64">
+              <circle class="ring-bg" cx="32" cy="32" r="27"/>
+              <circle class="ring-fg" cx="32" cy="32" r="27"
+                stroke="#10b981"
+                stroke-dasharray="169.6"
+                stroke-dashoffset="42.4"/>
+            </svg>
+            <span class="ring-label" style="color:#34d399">75%</span>
+          </div>
+          <div class="ring-name">This Week</div>
+        </div>
+        <div class="ring-card">
+          <div class="ring-wrap">
+            <svg class="ring-svg" width="64" height="64" viewBox="0 0 64 64">
+              <circle class="ring-bg" cx="32" cy="32" r="27"/>
+              <circle class="ring-fg" cx="32" cy="32" r="27"
+                stroke="#f59e0b"
+                stroke-dasharray="169.6"
+                stroke-dashoffset="27.1"/>
+            </svg>
+            <span class="ring-label" style="color:#fbbf24">84%</span>
+          </div>
+          <div class="ring-name">This Month</div>
+        </div>
+      </div>
+
+      <!-- spacer -->
+      <div style="height:10px"></div>
+
+    </div><!-- /scroll-area -->
+
+    <!-- FAB -->
+    <div class="fab" onclick="openModal()" title="Add Reminder">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M11 4v14M4 11h14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+      <a class="nav-item active" href="dashboard.html" style="text-decoration:none;">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+          <path d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="nav-label" style="color:#6366f1">Home</span>
+        <div class="nav-dot"></div>
+      </a>
+      <a class="nav-item" href="alerts.html" style="text-decoration:none;">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="nav-label">Alerts</span>
+      </a>
+      <a class="nav-item" href="map.html" style="text-decoration:none;">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="8" y1="2" x2="8" y2="18" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+          <line x1="16" y1="6" x2="16" y2="22" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+        </svg>
+        <span class="nav-label">Map</span>
+      </a>
+      <a class="nav-item" href="stats.html" style="text-decoration:none;">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+          <line x1="18" y1="20" x2="18" y2="10" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="12" y1="20" x2="12" y2="4"  stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="6"  y1="20" x2="6"  y2="14" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="nav-label">Stats</span>
+      </a>
+      <a class="nav-item" href="profile.html" style="text-decoration:none;">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="8" r="4" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+          <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="nav-label">Profile</span>
+      </a>
+    </div>
+
+    <!-- Add Reminder Modal -->
+    <div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <p class="modal-title">Add New Reminder</p>
+
+        <div class="m-input-wrap">
+          <svg class="m-icon" viewBox="0 0 16 16" fill="none">
+            <path d="M2 4h12M2 8h8M2 12h5" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          <input class="m-field" id="m-task" type="text" placeholder="What to remind you about?"/>
+        </div>
+
+        <div class="m-input-wrap">
+          <svg class="m-icon" viewBox="0 0 16 16" fill="none">
+            <rect x="1.5" y="2.5" width="13" height="12" rx="1.5" stroke="white" stroke-width="1.2"/>
+            <path d="M5 1.5v2M11 1.5v2M1.5 6.5h13" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          <input class="m-field" id="m-time" type="datetime-local" style="color:#4b5563"/>
+        </div>
+
+        <div class="m-input-wrap">
+          <svg class="m-icon" viewBox="0 0 16 16" fill="none">
+            <path d="M8 1.5C5.52 1.5 3.5 3.52 3.5 6c0 3.75 4.5 8.5 4.5 8.5s4.5-4.75 4.5-8.5c0-2.48-2.02-4.5-4.5-4.5z" stroke="white" stroke-width="1.2"/>
+            <circle cx="8" cy="6" r="1.5" stroke="white" stroke-width="1.1"/>
+          </svg>
+          <input class="m-field" id="m-loc" type="text" placeholder="Location (optional)"/>
+        </div>
+
+        <p style="font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:0.5px;text-transform:uppercase;">Trigger Type</p>
+        <div class="trigger-row">
+          <div class="trigger-chip sel" id="tc-time"  onclick="selTrigger('time')">⏰ Time</div>
+          <div class="trigger-chip"     id="tc-loc"   onclick="selTrigger('loc')">📍 Location</div>
+          <div class="trigger-chip"     id="tc-act"   onclick="selTrigger('act')">🏃 Activity</div>
+          <div class="trigger-chip"     id="tc-ai"    onclick="selTrigger('ai')">✨ AI Smart</div>
+        </div>
+
+        <button class="m-btn" onclick="addReminder()">Add Reminder</button>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+    <div id="alerts"></div>
+  </div><!-- /screen -->
+</div><!-- /phone -->
+
+<script>
+function setDashboardIdentity(user) {
+  var name = (user && user.name) || localStorage.getItem('userName') || 'Rahul Kumar';
+  var usernameNode = document.querySelector('.username');
+  var avatarNode = document.querySelector('.avatar');
+
+  if (usernameNode) {
+    usernameNode.textContent = name + ' 👋';
+  }
+
+  if (avatarNode) {
+    var parts = name.trim().split(' ').filter(Boolean);
+    var initials = parts.length >= 2
+      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      : name.substring(0, 2).toUpperCase();
+    avatarNode.innerHTML = initials + '<div class="avatar-badge"></div>';
+  }
+}
+
+window.onload = async function () {
+  const email = localStorage.getItem("userEmail");
+
+  if (!email) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/users/${encodeURIComponent(email)}`);
+    const user = await res.json();
+
+    if (user && user.name) {
+      localStorage.setItem("userName", user.name);
+      if (user.username) {
+        localStorage.setItem("userHandle", user.username);
+      }
+      setDashboardIdentity(user);
+    } else {
+      setDashboardIdentity();
+    }
+  } catch (error) {
+    setDashboardIdentity();
+  }
+};
+
+async function loadAlerts() {
+  const res = await fetch("http://localhost:5000/api/alerts");
+  const alerts = await res.json();
+
+  const container = document.getElementById("alerts");
+
+  alerts.forEach(a => {
+    const p = document.createElement("p");
+    p.textContent = a.message;
+    container.appendChild(p);
+  });
+}
+
+loadAlerts();
+async function loadAlerts() {
+  const res = await fetch("http://localhost:5000/api/alerts");
+  const alerts = await res.json();
+
+  const container = document.getElementById("alerts");
+  container.innerHTML = ""; // clear old data
+
+  alerts.forEach(a => {
+    const p = document.createElement("p");
+    p.textContent = a.message;
+    container.appendChild(p);
+  });
+}
+
+// 🔁 Call every 3 seconds
+setInterval(loadAlerts, 3000);
+
+// First load
+loadAlerts();
+  </script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ContextMind – Alerts</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#070a15;--surface:#0d0f1e;--card:#12152a;--card2:#161929;--border:rgba(255,255,255,0.07);--purple:#6366f1;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--blue:#3b82f6;--text:#e5e7eb;--muted:#6b7280;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem 1rem;}
+    .phone{width:370px;background:#0b0d1c;border-radius:44px;padding:12px;border:0.5px solid rgba(255,255,255,0.08);box-shadow:0 40px 100px rgba(0,0,0,0.8);}
+    .notch{width:88px;height:22px;background:#0b0d1c;border-radius:0 0 14px 14px;margin:0 auto 8px;}
+    .screen{background:var(--bg);border-radius:34px;overflow:hidden;height:760px;display:flex;flex-direction:column;position:relative;}
+    .scroll-area{flex:1;overflow-y:auto;padding-bottom:72px;}
+    .scroll-area::-webkit-scrollbar{display:none;}
+    .status-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 18px 0;flex-shrink:0;}
+    .s-time{font-family:'Space Mono',monospace;font-size:11px;color:rgba(255,255,255,0.45);}
+    .s-icons{display:flex;gap:5px;align-items:center;}
+    .page-header{padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between;}
+    .page-title{font-size:20px;font-weight:700;color:#fff;}
+    .header-action{font-size:11px;color:var(--purple);cursor:pointer;}
+
+    /* Filter tabs */
+    .filter-tabs{display:flex;gap:8px;padding:14px 18px 0;overflow-x:auto;}
+    .filter-tabs::-webkit-scrollbar{display:none;}
+    .ftab{padding:7px 16px;border-radius:20px;font-size:11px;cursor:pointer;white-space:nowrap;transition:all 0.2s;border:0.5px solid rgba(255,255,255,0.08);color:var(--muted);background:rgba(255,255,255,0.03);}
+    .ftab.active{background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.4);color:#a5b4fc;}
+
+    /* Alert cards */
+    .sec-label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:16px 18px 8px;}
+    .alert-card{margin:0 18px 10px;background:var(--card);border:0.5px solid var(--border);border-radius:18px;padding:14px 14px;display:flex;gap:12px;cursor:pointer;transition:background 0.2s;animation:slideIn 0.3s ease both;}
+    .alert-card:hover{background:var(--card2);}
+    @keyframes slideIn{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);}}
+    .alert-card.unread{border-left:3px solid var(--purple);}
+    .alert-card.alert-success{border-left-color:var(--green);}
+    .alert-card.alert-warn{border-left-color:var(--amber);}
+    .alert-card.alert-info{border-left-color:var(--blue);}
+
+    .a-icon-wrap{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .ic-purple{background:rgba(99,102,241,0.12);}
+    .ic-green {background:rgba(16,185,129,0.12);}
+    .ic-amber {background:rgba(245,158,11,0.12);}
+    .ic-blue  {background:rgba(59,130,246,0.12);}
+    .ic-red   {background:rgba(239,68,68,0.1);}
+
+    .a-body{flex:1;min-width:0;}
+    .a-title{font-size:13px;font-weight:500;color:#e5e7eb;margin-bottom:3px;}
+    .a-desc{font-size:11px;color:var(--muted);line-height:1.5;}
+    .a-meta{display:flex;align-items:center;gap:8px;margin-top:6px;}
+    .a-time{font-size:10px;color:#374151;}
+    .a-badge{font-size:9px;padding:2px 8px;border-radius:10px;}
+    .badge-loc{background:rgba(16,185,129,0.12);color:#34d399;}
+    .badge-ai {background:rgba(99,102,241,0.12);color:#818cf8;}
+    .badge-time{background:rgba(245,158,11,0.12);color:#fbbf24;}
+    .badge-sys{background:rgba(59,130,246,0.1);color:#60a5fa;}
+
+    .a-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;}
+    .unread-dot{width:8px;height:8px;border-radius:50%;background:var(--purple);}
+
+    /* Dismiss all btn */
+    .dismiss-bar{margin:0 18px 10px;background:rgba(99,102,241,0.06);border:0.5px solid rgba(99,102,241,0.15);border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+    .dismiss-bar:hover{background:rgba(99,102,241,0.1);}
+    .dismiss-txt{font-size:11px;color:#818cf8;}
+
+    /* Empty state */
+    .empty-state{text-align:center;padding:40px 20px;}
+    .empty-icon{font-size:40px;margin-bottom:12px;}
+    .empty-title{font-size:14px;color:#9ca3af;margin-bottom:6px;}
+    .empty-sub{font-size:11px;color:#4b5563;}
+
+    /* Bottom nav */
+    .bottom-nav{position:absolute;bottom:0;left:0;right:0;background:rgba(10,12,26,0.97);border-top:0.5px solid rgba(255,255,255,0.07);display:flex;padding:10px 0 16px;border-radius:0 0 34px 34px;z-index:50;}
+    .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;text-decoration:none;}
+    .nav-label{font-size:9px;color:#4b5563;letter-spacing:0.3px;font-family:'Sora',sans-serif;}
+    .nav-item.active .nav-label{color:#6366f1;}
+    .nav-dot{width:4px;height:4px;border-radius:50%;background:#6366f1;margin:0 auto;margin-top:-1px;display:none;}
+    .nav-item.active .nav-dot{display:block;}
+
+    /* Toast */
+    .toast{position:absolute;bottom:85px;left:50%;transform:translateX(-50%) translateY(30px);background:#1a1d36;border:0.5px solid rgba(99,102,241,0.35);color:#a5b4fc;font-size:11px;padding:8px 18px;border-radius:20px;opacity:0;transition:all 0.3s;white-space:nowrap;z-index:99;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  </style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="screen">
+
+    <div class="scroll-area">
+
+
+      <!-- Header -->
+      <div class="page-header">
+        <p class="page-title">Alerts</p>
+        <span class="header-action" onclick="dismissAll()">Clear all</span>
+      </div>
+
+      <!-- Filter tabs -->
+      <div class="filter-tabs">
+        <div class="ftab active" onclick="filterTab(this,'all')">All</div>
+        <div class="ftab" onclick="filterTab(this,'unread')">Unread (4)</div>
+        <div class="ftab" onclick="filterTab(this,'location')">Location</div>
+        <div class="ftab" onclick="filterTab(this,'ai')">AI</div>
+        <div class="ftab" onclick="filterTab(this,'system')">System</div>
+      </div>
+
+      <!-- Today -->
+      <p class="sec-label">Today</p>
+
+      <div class="dismiss-bar" onclick="dismissAll()">
+        <span class="dismiss-txt">🔔 4 unread notifications</span>
+        <span style="font-size:10px;color:#4b5563;">Dismiss all →</span>
+      </div>
+
+      <!-- Alert 1 -->
+      <div class="alert-card unread" id="al1" style="animation-delay:0.05s">
+        <div class="a-icon-wrap ic-green">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2C7.24 2 5 4.24 5 7c0 4.25 5 11 5 11s5-6.75 5-11c0-2.76-2.24-5-5-5z" fill="#10b981" opacity="0.9"/><circle cx="10" cy="7" r="2" fill="#070a15"/></svg>
+        </div>
+        <div class="a-body">
+          <div class="a-title">📍 You're near D-Mart!</div>
+          <div class="a-desc">Your reminder "Buy Groceries" is triggered. You are ~180m away.</div>
+          <div class="a-meta">
+            <span class="a-badge badge-loc">Location</span>
+            <span class="a-time">2 min ago</span>
+          </div>
+        </div>
+        <div class="a-right">
+          <div class="unread-dot"></div>
+          <span style="font-size:18px">🛒</span>
+        </div>
+      </div>
+
+      <!-- Alert 2 -->
+      <div class="alert-card alert-success unread" id="al2" style="animation-delay:0.1s">
+        <div class="a-icon-wrap ic-purple">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="#6366f1" stroke-width="1.3"/><path d="M7 10h6M10 7v6" stroke="#6366f1" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </div>
+        <div class="a-body">
+          <div class="a-title">✨ AI Suggestion Ready</div>
+          <div class="a-desc">Based on your Tuesday habit, I suggest "Check Tyre Pressure" reminder.</div>
+          <div class="a-meta">
+            <span class="a-badge badge-ai">AI</span>
+            <span class="a-time">15 min ago</span>
+          </div>
+        </div>
+        <div class="a-right">
+          <div class="unread-dot"></div>
+          <span style="font-size:18px">🤖</span>
+        </div>
+      </div>
+
+      <!-- Alert 3 -->
+      <div class="alert-card alert-warn unread" id="al3" style="animation-delay:0.15s">
+        <div class="a-icon-wrap ic-amber">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="#f59e0b" stroke-width="1.5"/><path d="M10 6v4.5l3 1.5" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="a-body">
+          <div class="a-title">⏰ Reminder in 30 minutes</div>
+          <div class="a-desc">"Call Mom" is scheduled for 6:00 PM. Don't forget!</div>
+          <div class="a-meta">
+            <span class="a-badge badge-time">Time</span>
+            <span class="a-time">1 hr ago</span>
+          </div>
+        </div>
+        <div class="a-right">
+          <div class="unread-dot"></div>
+          <span style="font-size:18px">📞</span>
+        </div>
+      </div>
+
+      <!-- Alert 4 -->
+      <div class="alert-card alert-info unread" id="al4" style="animation-delay:0.2s">
+        <div class="a-icon-wrap ic-blue">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="8" r="4" stroke="#3b82f6" stroke-width="1.3"/><path d="M3 18c0-3.9 3.13-7 7-7s7 3.1 7 7" stroke="#3b82f6" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </div>
+        <div class="a-body">
+          <div class="a-title">🔵 Activity Detected</div>
+          <div class="a-desc">You started walking. Reminder "Morning Walk" marked in progress.</div>
+          <div class="a-meta">
+            <span class="a-badge badge-sys">Activity</span>
+            <span class="a-time">2 hr ago</span>
+          </div>
+        </div>
+        <div class="a-right">
+          <div class="unread-dot"></div>
+          <span style="font-size:18px">🚶</span>
+        </div>
+      </div>
+
+      <!-- Yesterday -->
+      <p class="sec-label">Yesterday</p>
+
+      <div class="alert-card" id="al5" style="animation-delay:0.25s;opacity:0.7;">
+        <div class="a-icon-wrap ic-green">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 10l4 4 7-7" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="a-body">
+          <div class="a-title">✅ Reminder Completed</div>
+          <div class="a-desc">"Buy vegetables" was marked done. Great job!</div>
+          <div class="a-meta">
+            <span class="a-badge badge-loc">Location</span>
+            <span class="a-time">Yesterday, 5:30 PM</span>
+          </div>
+        </div>
+        <div class="a-right"><span style="font-size:18px">✅</span></div>
+      </div>
+
+      <div class="alert-card" id="al6" style="animation-delay:0.3s;opacity:0.7;">
+        <div class="a-icon-wrap ic-red">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="#ef4444" stroke-width="1.3"/><path d="M7 10h6" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="a-body">
+          <div class="a-title">❌ Missed Reminder</div>
+          <div class="a-desc">"Evening walk" was not completed yesterday at 6 PM.</div>
+          <div class="a-meta">
+            <span class="a-badge" style="background:rgba(239,68,68,0.1);color:#f87171;">Missed</span>
+            <span class="a-time">Yesterday, 6:00 PM</span>
+          </div>
+        </div>
+        <div class="a-right"><span style="font-size:18px">⚠️</span></div>
+      </div>
+
+      <div style="height:8px"></div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+      <a class="nav-item" href="dashboard.html" id="nav-home">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span class="nav-label">Home</span>
+        <div class="nav-dot"></div>
+      </a>
+      <a class="nav-item active" href="alerts.html" id="nav-alerts">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span class="nav-label" style="color:#6366f1">Alerts</span>
+        <div class="nav-dot"></div>
+      </a>
+      <a class="nav-item" href="map.html" id="nav-map">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="2" x2="8" y2="18" stroke="rgba(255,255,255,0.28)" stroke-width="1.5"/><line x1="16" y1="6" x2="16" y2="22" stroke="rgba(255,255,255,0.28)" stroke-width="1.5"/></svg>
+        <span class="nav-label">Map</span>
+        <div class="nav-dot"></div>
+      </a>
+      <a class="nav-item" href="stats.html" id="nav-stats">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><line x1="18" y1="20" x2="18" y2="10" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round"/><line x1="12" y1="20" x2="12" y2="4" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round"/><line x1="6" y1="20" x2="6" y2="14" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span class="nav-label">Stats</span>
+        <div class="nav-dot"></div>
+      </a>
+      <a class="nav-item" href="profile.html" id="nav-profile">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="rgba(255,255,255,0.28)" stroke-width="1.5"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span class="nav-label">Profile</span>
+        <div class="nav-dot"></div>
+      </a>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+<script>
+</script>
+</body>
+</html>

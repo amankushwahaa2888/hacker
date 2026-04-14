@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Remio – Create Account</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #070a15;
+      padding: 2rem 1rem;
+    }
+
+    /* ── Phone Shell ── */
+    .phone-wrap {
+      background: #0d0f1a;
+      border-radius: 40px;
+      padding: 12px;
+      border: 0.5px solid rgba(255,255,255,0.08);
+      width: 360px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+    }
+
+    .phone-notch {
+      width: 90px; height: 24px;
+      background: #0d0f1a;
+      border-radius: 0 0 14px 14px;
+      margin: 0 auto 10px;
+    }
+
+    /* ── Screen ── */
+    .screen {
+      background: #10132b;
+      border-radius: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 22px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glow-top {
+      position: absolute; top: -50px; left: 50%;
+      transform: translateX(-50%);
+      width: 220px; height: 200px;
+      background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .glow-br {
+      position: absolute; bottom: -40px; right: -30px;
+      width: 160px; height: 160px;
+      background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .glow-bl {
+      position: absolute; bottom: -20px; left: -30px;
+      width: 140px; height: 140px;
+      background: radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── Status Bar ── */
+    .status-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      width: 100%; padding: 0 4px; margin-bottom: 8px; z-index: 1;
+    }
+    .status-time {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; color: rgba(255,255,255,0.5);
+    }
+    .status-icons { display: flex; gap: 6px; align-items: center; }
+
+    /* ── Logo ── */
+    .logo-area {
+      display: flex; flex-direction: column; align-items: center;
+      margin: 6px 0 18px; z-index: 1;
+    }
+    .icon-ring {
+      width: 56px; height: 56px; border-radius: 18px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 10px;
+      box-shadow: 0 8px 24px rgba(99,102,241,0.4);
+    }
+    .app-name {
+      font-family: 'Space Mono', monospace;
+      font-size: 17px; font-weight: 700; color: #fff; letter-spacing: 1px;
+    }
+    .tagline { font-size: 10px; color: #6366f1; margin-top: 3px; letter-spacing: 2.5px; text-transform: uppercase; }
+
+    /* ── Step indicator ── */
+    .steps-wrap { display: flex; align-items: center; gap: 6px; margin-bottom: 18px; z-index: 1; }
+    .step-dot {
+      width: 28px; height: 5px; border-radius: 3px;
+      background: rgba(255,255,255,0.1); transition: background 0.3s;
+    }
+    .step-dot.active { background: #6366f1; }
+    .step-dot.done   { background: #10b981; }
+    .step-label { font-size: 10px; color: #4b5563; margin-left: 6px; }
+
+    /* ── Form Pages ── */
+    .form-area { width: 100%; z-index: 1; }
+    .form-page { display: none; }
+    .form-page.active { display: block; }
+
+    .section-title {
+      font-size: 13px; font-weight: 600; color: #a5b4fc;
+      margin-bottom: 14px; letter-spacing: 0.3px;
+    }
+
+    /* ── Input ── */
+    .input-wrap { position: relative; margin-bottom: 12px; }
+    .input-icon {
+      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+      width: 15px; height: 15px; opacity: 0.4; pointer-events: none;
+    }
+    .field {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid rgba(255,255,255,0.1);
+      border-radius: 13px;
+      padding: 12px 12px 12px 38px;
+      color: #e5e7eb; font-size: 13px;
+      font-family: 'Sora', sans-serif;
+      outline: none; transition: border-color 0.2s, background 0.2s;
+    }
+    .field:focus {
+      border-color: rgba(99,102,241,0.6);
+      background: rgba(99,102,241,0.07);
+    }
+    .field::placeholder { color: #4b5563; }
+    .field.valid   { border-color: rgba(16,185,129,0.5); }
+    .field.invalid { border-color: rgba(248,113,113,0.5); }
+
+    .toggle-eye {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      cursor: pointer; opacity: 0.35; transition: opacity 0.2s;
+    }
+    .toggle-eye:hover { opacity: 0.7; }
+
+    .error-msg { font-size: 10px; color: #f87171; margin: -6px 0 8px 4px; display: none; }
+    .hint-msg  { font-size: 10px; color: #4b5563; margin: -6px 0 8px 4px; }
+
+    /* Gender Row */
+    .gender-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .gender-btn {
+      flex: 1; padding: 10px 6px; border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid rgba(255,255,255,0.08);
+      color: #6b7280; font-size: 12px; font-family: 'Sora', sans-serif;
+      cursor: pointer; text-align: center; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .gender-btn:hover { background: rgba(99,102,241,0.1); color: #a5b4fc; }
+    .gender-btn.selected {
+      background: rgba(99,102,241,0.15);
+      border-color: rgba(99,102,241,0.5);
+      color: #a5b4fc;
+    }
+
+    /* Password strength */
+    .strength-wrap { margin: -6px 0 10px; }
+    .strength-bar {
+      height: 3px; border-radius: 2px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden; margin-bottom: 4px;
+    }
+    .strength-fill {
+      height: 100%; border-radius: 2px; width: 0%;
+      transition: width 0.3s, background 0.3s;
+    }
+    .strength-text { font-size: 10px; color: #4b5563; }
+
+    /* Permissions */
+    .perm-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .perm-item {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 0.5px solid rgba(255,255,255,0.07);
+      border-radius: 13px; padding: 12px;
+    }
+    .perm-icon-wrap {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .perm-icon-loc  { background: rgba(16,185,129,0.15); }
+    .perm-icon-notif{ background: rgba(99,102,241,0.15); }
+    .perm-icon-act  { background: rgba(251,191,36,0.12); }
+    .perm-info { flex: 1; }
+    .perm-name { font-size: 12px; color: #e5e7eb; font-weight: 500; margin-bottom: 2px; }
+    .perm-desc { font-size: 10px; color: #4b5563; }
+
+    /* Toggle switch */
+    .toggle-wrap { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+    .toggle-wrap input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; cursor: pointer;
+      background: rgba(255,255,255,0.1); border-radius: 10px;
+      transition: background 0.25s;
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute;
+      width: 14px; height: 14px; border-radius: 50%;
+      left: 3px; top: 3px;
+      background: white; transition: transform 0.25s;
+    }
+    .toggle-wrap input:checked + .toggle-slider { background: #6366f1; }
+    .toggle-wrap input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+    /* Terms checkbox */
+    .terms-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin-bottom: 16px;
+    }
+    .custom-check {
+      width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; margin-top: 1px;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid rgba(255,255,255,0.15);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .custom-check.checked { background: #6366f1; border-color: #6366f1; }
+    .terms-text { font-size: 11px; color: #6b7280; line-height: 1.6; }
+    .terms-text a { color: #6366f1; text-decoration: none; }
+
+    /* Buttons */
+    .btn-primary {
+      width: 100%; padding: 13px; border-radius: 14px;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      border: none; color: #fff; font-size: 13px;
+      font-family: 'Sora', sans-serif; font-weight: 600;
+      letter-spacing: 0.5px; cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s; margin-bottom: 10px;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-back {
+      width: 100%; padding: 11px; border-radius: 14px;
+      background: transparent;
+      border: 0.5px solid rgba(255,255,255,0.1);
+      color: #6b7280; font-size: 13px;
+      font-family: 'Sora', sans-serif;
+      cursor: pointer; transition: border-color 0.2s, color 0.2s;
+      margin-bottom: 14px;
+    }
+    .btn-back:hover { border-color: rgba(255,255,255,0.25); color: #9ca3af; }
+
+    .login-row { text-align: center; font-size: 12px; color: #6b7280; }
+    .login-row a { color: #6366f1; text-decoration: none; font-weight: 500; }
+
+    /* Divider */
+    .divider { display: flex; align-items: center; gap: 10px; margin: 10px 0 12px; }
+    .divider-line { flex: 1; height: 0.5px; background: rgba(255,255,255,0.07); }
+    .divider-text { font-size: 10px; color: #4b5563; }
+
+    /* Social */
+    .social-row { display: flex; gap: 8px; margin-bottom: 14px; }
+    .social-btn {
+      flex: 1; padding: 10px; border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .social-btn:hover { background: rgba(255,255,255,0.08); }
+    .social-label { font-size: 12px; color: #9ca3af; }
+
+    /* Success Screen */
+    #page-success {
+      text-align: center; padding: 10px 0;
+    }
+    .success-ring {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: rgba(16,185,129,0.15);
+      border: 2px solid rgba(16,185,129,0.4);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+      animation: popIn 0.4s ease;
+    }
+    @keyframes popIn {
+      0%   { transform: scale(0.5); opacity: 0; }
+      80%  { transform: scale(1.1); }
+      100% { transform: scale(1);   opacity: 1; }
+    }
+    .success-title { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+    .success-sub   { font-size: 12px; color: #6b7280; line-height: 1.6; margin-bottom: 22px; }
+    .feature-chips { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-bottom: 22px; }
+    .chip {
+      font-size: 10px; padding: 5px 11px; border-radius: 20px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .chip-g { background: rgba(16,185,129,0.12); color: #34d399; border: 0.5px solid rgba(16,185,129,0.2); }
+    .chip-p { background: rgba(99,102,241,0.12);  color: #818cf8; border: 0.5px solid rgba(99,102,241,0.2); }
+    .chip-y { background: rgba(251,191,36,0.1);   color: #fbbf24; border: 0.5px solid rgba(251,191,36,0.15); }
+    .dot { width: 5px; height: 5px; border-radius: 50%; }
+    .dot-g { background: #34d399; }
+    .dot-p { background: #818cf8; }
+    .dot-y { background: #fbbf24; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1e1e3a; border: 0.5px solid rgba(99,102,241,0.4);
+      color: #a5b4fc; font-size: 12px; padding: 10px 20px;
+      border-radius: 30px; transition: transform 0.3s ease;
+      white-space: nowrap; z-index: 999;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<div class="phone-wrap">
+  <div class="phone-notch"></div>
+
+  <div class="screen">
+    <div class="glow-top"></div>
+    <div class="glow-br"></div>
+    <div class="glow-bl"></div>
+
+    
+
+    <!-- Logo -->
+    <div class="logo-area">
+  
+  <div class="icon-ring">
+    <img src="logo.png" alt="logo" class="logo-img">
+  </div>
+
+</div>
+
+<style>
+.icon-ring {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  box-shadow: 0 8px 24px rgba(99,102,241,0.4);
+}
+
+/* logo image fit */
+.logo-img {
+  width: 60%;
+  height: 60%;
+  object-fit: contain;
+}
+</style>
+      <p class="app-name">Remio</p>
+      <p class="tagline">Create your account</p>
+    </div>
+
+    <!-- Step Dots -->
+    <div class="steps-wrap">
+      <div class="step-dot active" id="dot-1"></div>
+      <div class="step-dot" id="dot-2"></div>
+      <div class="step-dot" id="dot-3"></div>
+      <span class="step-label" id="step-label">Step 1 of 3</span>
+    </div>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- PAGE 1 — Personal Info               -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="form-area">
+      <div class="form-page active" id="page-1">
+        <p class="section-title">Personal Information</p>
+
+        <!-- Full Name -->
+        <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="5.5" r="3" stroke="white" stroke-width="1.2"/>
+            <path d="M2 13.5c0-3 2.686-5 6-5s6 2 6 5" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          <input class="field" id="fullname" type="text" placeholder="Full name"/>
+        </div>
+        <p class="error-msg" id="err-name">Name is required.</p>
+
+        <!-- Username -->
+        <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 16 16" fill="none">
+            <path d="M8 1.5C4.41 1.5 1.5 4.41 1.5 8S4.41 14.5 8 14.5 14.5 11.59 14.5 8 11.59 1.5 8 1.5z" stroke="white" stroke-width="1.2"/>
+            <path d="M5.5 6.5C5.5 5.12 6.62 4 8 4s2.5 1.12 2.5 2.5c0 1.5-1.12 2.5-2.5 2.5" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="8" cy="11" r="0.8" fill="white" opacity="0.7"/>
+          </svg>
+          <input class="field" id="username" type="text" placeholder="Username (e.g. @john_doe)"/>
+        </div>
+        <p class="error-msg" id="err-username">Username must be at least 3 characters.</p>
+
+        <!-- Email -->
+        <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 16 16" fill="none">
+            <rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="white" stroke-width="1.2"/>
+            <path d="M1.5 5l6.5 4.5L14.5 5" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          <input class="field" id="email" type="email" placeholder="Email address"/>
+        </div>
+        <p class="error-msg" id="err-email">Enter a valid email address.</p>
+
+        <!-- Gender -->
+        <div class="gender-row">
+          <div class="gender-btn" id="g-male"   onclick="selectGender('male')">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="9" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 5.5L14 2M14 2h-3M14 2v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Male
+          </div>
+          <div class="gender-btn" id="g-female" onclick="selectGender('female')">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 11v4M5.5 13h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Female
+          </div>
+          <div class="gender-btn" id="g-other"  onclick="selectGender('other')">Other</div>
+        </div>
+
+        <!-- Phone -->
+        <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 16 16" fill="none">
+            <rect x="3.5" y="1" width="9" height="14" rx="2" stroke="white" stroke-width="1.2"/>
+            <circle cx="8" cy="12.5" r="0.8" fill="white" opacity="0.6"/>
+          </svg>
+          <input class="field" id="phone" type="tel" placeholder="Phone number (optional)"/>
+        </div>
+
+        <button class="btn-primary" onclick="goStep2()">Continue →</button>
+        <div class="divider">
+          <div class="divider-line"></div>
+          <span class="divider-text">or sign up with</span>
+          <div class="divider-line"></div>
+        </div>
+        <div class="social-row">
+          <div class="social-btn" onclick="toast('Connecting Google...')">
+            <svg width="14" height="14" viewBox="0 0 18 18">
+              <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+              <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+              <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+              <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+            </svg>
+            <span class="social-label">Google</span>
+          </div>
+          <div class="social-btn" onclick="toast('Connecting Apple...')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="rgba(255,255,255,0.8)">
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+            </svg>
+            <span class="social-label">Apple</span>
+          </div>
+        </div>
+        <div class="login-row">Already have an account? <a href="login.html">Sign in</a></div>
+      </div>
+
+      <!-- ══════════════════════════════════════ -->
+      <!-- PAGE 2 — Password Setup               -->
+      <!-- ══════════════════════════════════════ -->
+      <div class="form-page" id="page-2">
+        <p class="section-title">Set Your Password</p>
+
+        <!-- Password -->
+        <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 16 16" fill="none">
+            <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="white" stroke-width="1.2"/>
+            <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="8" cy="10.5" r="1" fill="white" opacity="0.7"/>
+          </svg>
+          <input class="field" id="password" type="password" placeholder="Create password" oninput="checkStrength()"/>
+          <svg class="toggle-eye" viewBox="0 0 16 16" fill="none" width="17" height="17" onclick="togglePwd('password','eye1')" id="eye1">
+            <ellipse cx="8" cy="8" rx="6" ry="4" stroke="white" stroke-width="1.2"/>
+            <circle cx="8" cy="8" r="2" stroke="white" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <p class="error-msg" id="err-pwd">Password must be at least 8 characters.</p>
+
+        <!-- Strength Bar -->
+        <div class="strength-wrap">
+          <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+          <span class="strength-text" id="strength-text">Enter a password</span>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 16 16" fill="none">
+            <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="white" stroke-width="1.2"/>
+            <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M6.5 10.5l1.2 1.2 2-2" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <input class="field" id="confirm-pwd" type="password" placeholder="Confirm password"/>
+          <svg class="toggle-eye" viewBox="0 0 16 16" fill="none" width="17" height="17" onclick="togglePwd('confirm-pwd','eye2')" id="eye2">
+            <ellipse cx="8" cy="8" rx="6" ry="4" stroke="white" stroke-width="1.2"/>
+            <circle cx="8" cy="8" r="2" stroke="white" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <p class="error-msg" id="err-cpwd">Passwords do not match.</p>
+
+        <!-- Date of Birth -->
+        <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 16 16" fill="none">
+            <rect x="1.5" y="2.5" width="13" height="12" rx="1.5" stroke="white" stroke-width="1.2"/>
+            <path d="M5 1.5v2M11 1.5v2M1.5 6.5h13" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          <input class="field" id="dob" type="date" style="color:#4b5563;"/>
+        </div>
+        <p class="hint-msg">Date of birth helps personalise reminders.</p>
+
+        <!-- Terms -->
+        <div class="terms-row">
+          <div class="custom-check" id="terms-check" onclick="toggleTerms()"></div>
+          <p class="terms-text">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. My location and activity data will stay on-device.</p>
+        </div>
+        <p class="error-msg" id="err-terms">Please accept the terms to continue.</p>
+
+        <button class="btn-primary" onclick="goStep3()">Continue →</button>
+        <button class="btn-back" onclick="goPage(1)">← Back</button>
+      </div>
+
+      <!-- ══════════════════════════════════════ -->
+      <!-- PAGE 3 — Permissions                  -->
+      <!-- ══════════════════════════════════════ -->
+      <div class="form-page" id="page-3">
+        <p class="section-title">App Permissions</p>
+
+        <div class="perm-list">
+
+          <!-- Location -->
+          <div class="perm-item">
+            <div class="perm-icon-wrap perm-icon-loc">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                <path d="M10 2C7.24 2 5 4.24 5 7c0 4.25 5 11 5 11s5-6.75 5-11c0-2.76-2.24-5-5-5z" fill="#10b981" opacity="0.8"/>
+                <circle cx="10" cy="7" r="2" fill="#0d0f1a"/>
+              </svg>
+            </div>
+            <div class="perm-info">
+              <p class="perm-name">Location Access</p>
+              <p class="perm-desc">Trigger reminders near stores, offices & places</p>
+            </div>
+            <label class="toggle-wrap">
+              <input type="checkbox" id="perm-loc" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <!-- Notifications -->
+          <div class="perm-item">
+            <div class="perm-icon-wrap perm-icon-notif">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                <path d="M10 2a6 6 0 0 1 6 6v3l1.5 2.5H2.5L4 11V8a6 6 0 0 1 6-6z" fill="#6366f1" opacity="0.8"/>
+                <path d="M8 15.5a2 2 0 0 0 4 0" stroke="#6366f1" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="perm-info">
+              <p class="perm-name">Notifications</p>
+              <p class="perm-desc">Receive smart alerts at the right moment</p>
+            </div>
+            <label class="toggle-wrap">
+              <input type="checkbox" id="perm-notif" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <!-- Activity -->
+          <div class="perm-item">
+            <div class="perm-icon-wrap perm-icon-act">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                <path d="M3 10h3l2-6 4 12 2-6h3" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="perm-info">
+              <p class="perm-name">Activity Recognition</p>
+              <p class="perm-desc">Detect walking, driving & idle states</p>
+            </div>
+            <label class="toggle-wrap">
+              <input type="checkbox" id="perm-act"/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+        </div>
+
+        <button class="btn-primary" onclick="createAccount()">Create Account</button>
+        <button class="btn-back" onclick="goPage(2)">← Back</button>
+      </div>
+
+      <!-- ══════════════════════════════════════ -->
+      <!-- PAGE 4 — Success                      -->
+      <!-- ══════════════════════════════════════ -->
+      <div class="form-page" id="page-success">
+        <div class="success-ring">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path d="M8 16l5.5 5.5L24 10" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <p class="success-title">Account Created!</p>
+        <p class="success-sub" id="success-msg">Welcome to Remio.<br/>Your smart reminders are ready.</p>
+        <div class="feature-chips">
+          <div class="chip chip-g"><div class="dot dot-g"></div>Location-aware</div>
+          <div class="chip chip-p"><div class="dot dot-p"></div>AI-powered</div>
+          <div class="chip chip-y"><div class="dot dot-y"></div>Privacy-first</div>
+        </div>
+        <button class="btn-primary" onclick="goLogin()">Go to Dashboard →</button>
+      </div>
+
+    </div><!-- /form-area -->
+  </div><!-- /screen -->
+</div><!-- /phone-wrap -->
+
+<div class="toast" id="toast-msg"></div>
+
+<script>
+  var currentStep = 1;
+  var selectedGender = "male";
+  var termsAccepted = false;
+
+  function updateStepView() {
+    document.getElementById('page-1').classList.toggle('active', currentStep === 1);
+    document.getElementById('page-2').classList.toggle('active', currentStep === 2);
+    document.getElementById('page-3').classList.toggle('active', currentStep === 3);
+    document.getElementById('page-success')?.classList.toggle('active', currentStep === 4);
+
+    document.getElementById('dot-1').classList.toggle('active', currentStep === 1);
+    document.getElementById('dot-2').classList.toggle('active', currentStep === 2);
+    document.getElementById('dot-3').classList.toggle('active', currentStep === 3);
+    document.getElementById('dot-1').classList.toggle('done', currentStep > 1);
+    document.getElementById('dot-2').classList.toggle('done', currentStep > 2);
+    document.getElementById('step-label').textContent = currentStep === 4 ? 'Completed' : `Step ${Math.min(currentStep, 3)} of 3`;
+  }
+
+  function selectGender(gender) {
+    selectedGender = gender;
+    ['male', 'female', 'other'].forEach(function (option) {
+      var el = document.getElementById('g-' + option);
+      if (el) el.classList.toggle('selected', option === gender);
+    });
+  }
+
+  function toggleTerms() {
+    termsAccepted = !termsAccepted;
+    document.getElementById('terms-check').classList.toggle('checked', termsAccepted);
+  }
+
+  function togglePwd(fieldId, iconId) {
+    var field = document.getElementById(fieldId);
+    if (!field) return;
+    field.type = field.type === 'password' ? 'text' : 'password';
+  }
+
+  function checkStrength() {
+    var value = document.getElementById('password').value || '';
+    var score = 0;
+    if (value.length >= 8) score += 1;
+    if (/[A-Z]/.test(value)) score += 1;
+    if (/[0-9]/.test(value)) score += 1;
+    if (/[^A-Za-z0-9]/.test(value)) score += 1;
+    var fill = document.getElementById('strength-fill');
+    var text = document.getElementById('strength-text');
+    if (fill) {
+      fill.style.width = `${(score / 4) * 100}%`;
+      fill.style.background = score < 2 ? '#f87171' : score < 4 ? '#fbbf24' : '#34d399';
+    }
+    if (text) {
+      text.textContent = score < 2 ? 'Weak password' : score < 4 ? 'Good password' : 'Strong password';
+    }
+  }
+
+  function goPage(step) {
+    currentStep = step;
+    updateStepView();
+  }
+
+  function goStep2() {
+    var fullName = document.getElementById('fullname').value.trim();
+    var username = document.getElementById('username').value.trim();
+    var email = document.getElementById('email').value.trim();
+    var nameErr = document.getElementById('err-name');
+    var usernameErr = document.getElementById('err-username');
+    var emailErr = document.getElementById('err-email');
+    var valid = true;
+
+    nameErr.style.display = 'none';
+    usernameErr.style.display = 'none';
+    emailErr.style.display = 'none';
+
+    if (!fullName) {
+      nameErr.style.display = 'block';
+      valid = false;
+    }
+    if (username.length < 3) {
+      usernameErr.style.display = 'block';
+      valid = false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      emailErr.style.display = 'block';
+      valid = false;
+    }
+
+    if (!valid) return;
+    currentStep = 2;
+    updateStepView();
+  }
+
+  function goStep3() {
+    var password = document.getElementById('password').value;
+    var confirm = document.getElementById('confirm-pwd').value;
+    var passwordErr = document.getElementById('err-pwd');
+    var confirmErr = document.getElementById('err-cpwd');
+    var valid = true;
+
+    passwordErr.style.display = 'none';
+    confirmErr.style.display = 'none';
+
+    if (password.length < 8) {
+      passwordErr.style.display = 'block';
+      valid = false;
+    }
+    if (password !== confirm) {
+      confirmErr.style.display = 'block';
+      valid = false;
+    }
+    if (!termsAccepted) {
+      document.getElementById('err-terms').style.display = 'block';
+      valid = false;
+    } else {
+      document.getElementById('err-terms').style.display = 'none';
+    }
+
+    if (!valid) return;
+    currentStep = 3;
+    updateStepView();
+  }
+
+  async function createAccount() {
+    var data = {
+      name: document.getElementById('fullname').value.trim(),
+      username: document.getElementById('username').value.trim(),
+      email: document.getElementById('email').value.trim().toLowerCase(),
+      password: document.getElementById('password').value,
+      gender: selectedGender,
+      phone: document.getElementById('phone').value.trim(),
+      dob: document.getElementById('dob').value,
+      permissions: {
+        location: document.getElementById('perm-loc').checked,
+        notifications: document.getElementById('perm-notif').checked,
+        activity: document.getElementById('perm-act').checked
+      }
+    };
+
+    try {
+      var res = await fetch('http://localhost:5000/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      var payload = await res.json();
+      if (!res.ok || !payload.success) {
+        showToast(payload.message || 'Could not create account.');
+        return;
+      }
+      localStorage.setItem('userName', payload.user.name || '');
+      localStorage.setItem('userHandle', payload.user.username || '');
+      localStorage.setItem('userEmail', payload.user.email || '');
+      showToast('Account created successfully. Redirecting...');
+      currentStep = 4;
+      updateStepView();
+      setTimeout(function () { window.location.href = 'login.html'; }, 1400);
+    } catch (error) {
+      showToast('Unable to reach server. Start backend at http://localhost:5000');
+    }
+  }
+
+  function showToast(message) {
+    var toast = document.getElementById('toast-msg');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(function () { toast.classList.remove('show'); }, 3000);
+  }
+
+  function updateClock() {
+    var now = new Date();
+    var h = now.getHours().toString().padStart(2, '0');
+    var m = now.getMinutes().toString().padStart(2, '0');
+    document.getElementById('clock').textContent = h + ':' + m;
+  }
+
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // ── Go to Login ──
+  function goLogin() {
+    window.location.href = 'login.html';
+  }
+</script>
+</body>
+</html>
+

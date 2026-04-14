@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ContextMind – Stats</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#070a15;--surface:#0d0f1e;--card:#12152a;--card2:#161929;--border:rgba(255,255,255,0.07);--purple:#6366f1;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--blue:#3b82f6;--text:#e5e7eb;--muted:#6b7280;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem 1rem;}
+    .phone{width:370px;background:#0b0d1c;border-radius:44px;padding:12px;border:0.5px solid rgba(255,255,255,0.08);box-shadow:0 40px 100px rgba(0,0,0,0.8);}
+    .notch{width:88px;height:22px;background:#0b0d1c;border-radius:0 0 14px 14px;margin:0 auto 8px;}
+    .screen{background:var(--bg);border-radius:34px;overflow:hidden;height:760px;display:flex;flex-direction:column;position:relative;}
+    .scroll-area{flex:1;overflow-y:auto;padding-bottom:72px;}
+    .scroll-area::-webkit-scrollbar{display:none;}
+    .status-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 18px 0;}
+    .s-time{font-family:'Space Mono',monospace;font-size:11px;color:rgba(255,255,255,0.45);}
+    .s-icons{display:flex;gap:5px;align-items:center;}
+    .page-header{padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between;}
+    .page-title{font-size:20px;font-weight:700;color:#fff;}
+    .header-sub{font-size:11px;color:var(--muted);}
+
+    /* Period tabs */
+    .period-tabs{display:flex;gap:6px;padding:14px 18px 0;}
+    .ptab{flex:1;padding:8px;border-radius:12px;font-size:11px;text-align:center;cursor:pointer;transition:all 0.2s;border:0.5px solid rgba(255,255,255,0.07);color:var(--muted);background:rgba(255,255,255,0.03);}
+    .ptab.active{background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.4);color:#a5b4fc;font-weight:600;}
+
+    /* Big stat */
+    .big-stat-card{margin:14px 18px 0;background:linear-gradient(135deg,rgba(79,70,229,0.15),rgba(124,58,237,0.08));border:0.5px solid rgba(99,102,241,0.2);border-radius:20px;padding:18px;text-align:center;animation:fadeUp 0.4s ease;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    .big-num{font-family:'Space Mono',monospace;font-size:48px;font-weight:700;color:#818cf8;line-height:1;}
+    .big-label{font-size:12px;color:var(--muted);margin-top:6px;}
+    .big-change{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#34d399;margin-top:8px;background:rgba(16,185,129,0.1);padding:4px 12px;border-radius:20px;}
+
+    /* Stat grid */
+    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 18px 0;}
+    .sg-card{background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:14px;}
+    .sg-num{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;margin-bottom:4px;}
+    .sg-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+    .sg-change{font-size:10px;margin-top:6px;}
+    .up{color:#34d399;}
+    .down{color:#f87171;}
+
+    /* Bar chart */
+    .sec-header{display:flex;align-items:center;justify-content:space-between;padding:18px 18px 10px;}
+    .sec-title{font-size:13px;font-weight:600;color:#fff;}
+    .sec-link{font-size:10px;color:var(--purple);cursor:pointer;}
+
+    .bar-chart{padding:0 18px;animation:fadeUp 0.5s ease 0.1s both;}
+    .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .bar-day{font-size:10px;color:var(--muted);width:24px;text-align:center;flex-shrink:0;}
+    .bar-track{flex:1;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;}
+    .bar-fill{height:100%;border-radius:4px;transition:width 1s ease;}
+    .bar-val{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);width:28px;text-align:right;flex-shrink:0;}
+
+    /* Donut chart */
+    .donut-section{margin:0 18px;background:var(--card);border:0.5px solid var(--border);border-radius:18px;padding:16px;animation:fadeUp 0.5s ease 0.15s both;}
+    .donut-wrap{display:flex;align-items:center;gap:16px;}
+    .donut-svg-wrap{position:relative;width:80px;height:80px;flex-shrink:0;}
+    .donut-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+    .donut-pct{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:#818cf8;}
+    .donut-sub{font-size:8px;color:var(--muted);}
+    .donut-legend{flex:1;}
+    .dl-item{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+    .dl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .dl-name{font-size:11px;color:#9ca3af;flex:1;}
+    .dl-pct{font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);}
+
+    /* Streak calendar */
+    .streak-grid{padding:0 18px;animation:fadeUp 0.5s ease 0.2s both;}
+    .month-label{font-size:10px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+    .cal-day{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;}
+    .cal-done{background:rgba(99,102,241,0.25);color:#818cf8;}
+    .cal-great{background:rgba(99,102,241,0.5);color:#c7d2fe;}
+    .cal-miss{background:rgba(255,255,255,0.04);color:#374151;}
+    .cal-today{background:#6366f1;color:#fff;}
+    .cal-future{background:transparent;border:0.5px solid rgba(255,255,255,0.04);color:#1f2937;}
+    .day-labels{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px;}
+    .day-lbl{font-size:8px;color:#374151;text-align:center;}
+
+    /* Top reminders */
+    .top-list{padding:0 18px;animation:fadeUp 0.5s ease 0.25s both;}
+    .top-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid rgba(255,255,255,0.05);}
+    .top-item:last-child{border-bottom:none;}
+    .top-rank{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--muted);width:20px;flex-shrink:0;}
+    .top-rank.gold{color:#f59e0b;}
+    .top-rank.silver{color:#9ca3af;}
+    .top-rank.bronze{color:#b45309;}
+    .top-icon{font-size:16px;width:28px;text-align:center;flex-shrink:0;}
+    .top-info{flex:1;}
+    .top-name{font-size:12px;color:#e5e7eb;font-weight:500;}
+    .top-sub{font-size:10px;color:var(--muted);}
+    .top-stat{font-size:11px;font-family:'Space Mono',monospace;color:var(--green);}
+
+    /* Bottom Nav */
+    .bottom-nav{position:absolute;bottom:0;left:0;right:0;background:rgba(10,12,26,0.97);border-top:0.5px solid rgba(255,255,255,0.07);display:flex;padding:10px 0 16px;border-radius:0 0 34px 34px;z-index:50;}
+    .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;text-decoration:none;}
+    .nav-label{font-size:9px;color:#4b5563;letter-spacing:0.3px;font-family:'Sora',sans-serif;}
+    .nav-item.active .nav-label{color:#6366f1;}
+    .nav-dot{width:4px;height:4px;border-radius:50%;background:#6366f1;margin:0 auto;margin-top:-1px;display:none;}
+    .nav-item.active .nav-dot{display:block;}
+    .toast{position:absolute;bottom:85px;left:50%;transform:translateX(-50%) translateY(30px);background:#1a1d36;border:0.5px solid rgba(99,102,241,0.35);color:#a5b4fc;font-size:11px;padding:8px 18px;border-radius:20px;opacity:0;transition:all 0.3s;white-space:nowrap;z-index:99;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  </style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="screen">
+    <div class="scroll-area">
+      <div class="page-header">
+        <div><p class="page-title">Analytics</p><p class="header-sub">Your productivity insights</p></div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="cursor:pointer" onclick="showToast('Export report coming soon!')"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+
+      <!-- Period tabs -->
+      <div class="period-tabs">
+        <div class="ptab active" onclick="switchPeriod(this,'week')">Week</div>
+        <div class="ptab" onclick="switchPeriod(this,'month')">Month</div>
+        <div class="ptab" onclick="switchPeriod(this,'year')">Year</div>
+      </div>
+
+      <!-- Big stat -->
+      <div class="big-stat-card">
+        <div class="big-num" id="big-num">84%</div>
+        <div class="big-label">Overall Completion Rate</div>
+        <div class="big-change">▲ +12% from last week</div>
+      </div>
+
+      <!-- Stat grid -->
+      <div class="stat-grid">
+        <div class="sg-card">
+          <div class="sg-num" style="color:#818cf8" id="sg1">42</div>
+          <div class="sg-label">Reminders Set</div>
+          <div class="sg-change up">▲ +8 this week</div>
+        </div>
+        <div class="sg-card">
+          <div class="sg-num" style="color:#34d399" id="sg2">35</div>
+          <div class="sg-label">Completed</div>
+          <div class="sg-change up">▲ +5 this week</div>
+        </div>
+        <div class="sg-card">
+          <div class="sg-num" style="color:#f87171" id="sg3">7</div>
+          <div class="sg-label">Missed</div>
+          <div class="sg-change down">▼ -2 this week</div>
+        </div>
+        <div class="sg-card">
+          <div class="sg-num" style="color:#fbbf24" id="sg4">5🔥</div>
+          <div class="sg-label">Day Streak</div>
+          <div class="sg-change up">Best: 12 days</div>
+        </div>
+      </div>
+
+      <!-- Bar chart -->
+      <div class="sec-header"><span class="sec-title">Daily Completions</span><span class="sec-link">Details</span></div>
+      <div class="bar-chart" id="bar-chart">
+        <!-- bars injected by JS -->
+      </div>
+
+      <!-- Donut / type breakdown -->
+      <div class="sec-header"><span class="sec-title">Trigger Breakdown</span><span class="sec-link">View all</span></div>
+      <div class="donut-section">
+        <div class="donut-wrap">
+          <div class="donut-svg-wrap">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <!-- bg ring -->
+              <circle cx="40" cy="40" r="30" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="12"/>
+              <!-- Location 38% -->
+              <circle cx="40" cy="40" r="30" fill="none" stroke="#10b981" stroke-width="12" stroke-dasharray="188.5" stroke-dashoffset="116.9" transform="rotate(-90 40 40)" stroke-linecap="round"/>
+              <!-- Time 28% -->
+              <circle cx="40" cy="40" r="30" fill="none" stroke="#6366f1" stroke-width="12" stroke-dasharray="188.5" stroke-dashoffset="135.7" transform="rotate(47.5 40 40)" stroke-linecap="round"/>
+              <!-- Activity 20% -->
+              <circle cx="40" cy="40" r="30" fill="none" stroke="#f59e0b" stroke-width="12" stroke-dasharray="188.5" stroke-dashoffset="150.8" transform="rotate(148 40 40)" stroke-linecap="round"/>
+              <!-- AI 14% -->
+              <circle cx="40" cy="40" r="30" fill="none" stroke="#3b82f6" stroke-width="12" stroke-dasharray="188.5" stroke-dashoffset="162.2" transform="rotate(220 40 40)" stroke-linecap="round"/>
+            </svg>
+            <div class="donut-center"><div class="donut-pct">84%</div><div class="donut-sub">done</div></div>
+          </div>
+          <div class="donut-legend">
+            <div class="dl-item"><div class="dl-dot" style="background:#10b981"></div><div class="dl-name">Location</div><div class="dl-pct">38%</div></div>
+            <div class="dl-item"><div class="dl-dot" style="background:#6366f1"></div><div class="dl-name">Time-based</div><div class="dl-pct">28%</div></div>
+            <div class="dl-item"><div class="dl-dot" style="background:#f59e0b"></div><div class="dl-name">Activity</div><div class="dl-pct">20%</div></div>
+            <div class="dl-item"><div class="dl-dot" style="background:#3b82f6"></div><div class="dl-name">AI Smart</div><div class="dl-pct">14%</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Streak calendar -->
+      <div class="sec-header"><span class="sec-title">Streak Calendar</span><span class="sec-link">April 2026</span></div>
+      <div class="streak-grid">
+        <div class="day-labels">
+          <div class="day-lbl">Su</div><div class="day-lbl">Mo</div><div class="day-lbl">Tu</div>
+          <div class="day-lbl">We</div><div class="day-lbl">Th</div><div class="day-lbl">Fr</div><div class="day-lbl">Sa</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+
+      <!-- Top reminders -->
+      <div class="sec-header"><span class="sec-title">Top Reminders</span><span class="sec-link">All time</span></div>
+      <div class="top-list">
+        <div class="top-item">
+          <div class="top-rank gold">01</div>
+          <div class="top-icon">🛒</div>
+          <div class="top-info"><div class="top-name">Buy Groceries</div><div class="top-sub">Location trigger</div></div>
+          <div class="top-stat">18×</div>
+        </div>
+        <div class="top-item">
+          <div class="top-rank silver">02</div>
+          <div class="top-icon">🚶</div>
+          <div class="top-info"><div class="top-name">Morning Walk</div><div class="top-sub">Activity trigger</div></div>
+          <div class="top-stat">15×</div>
+        </div>
+        <div class="top-item">
+          <div class="top-rank bronze">03</div>
+          <div class="top-icon">📞</div>
+          <div class="top-info"><div class="top-name">Call Mom</div><div class="top-sub">Time trigger</div></div>
+          <div class="top-stat">12×</div>
+        </div>
+        <div class="top-item">
+          <div class="top-rank">04</div>
+          <div class="top-icon">💊</div>
+          <div class="top-info"><div class="top-name">Take Medicine</div><div class="top-sub">Activity trigger</div></div>
+          <div class="top-stat">11×</div>
+        </div>
+        <div class="top-item">
+          <div class="top-rank">05</div>
+          <div class="top-icon">✨</div>
+          <div class="top-info"><div class="top-name">AI Suggestions</div><div class="top-sub">Smart trigger</div></div>
+          <div class="top-stat">9×</div>
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+      <a class="nav-item" href="dashboard.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round"/></svg><span class="nav-label">Home</span><div class="nav-dot"></div></a>
+      <a class="nav-item" href="alerts.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round"/></svg><span class="nav-label">Alerts</span><div class="nav-dot"></div></a>
+      <a class="nav-item" href="map.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="2" x2="8" y2="18" stroke="rgba(255,255,255,0.28)" stroke-width="1.5"/><line x1="16" y1="6" x2="16" y2="22" stroke="rgba(255,255,255,0.28)" stroke-width="1.5"/></svg><span class="nav-label">Map</span><div class="nav-dot"></div></a>
+      <a class="nav-item active" href="stats.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><line x1="18" y1="20" x2="18" y2="10" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round"/><line x1="12" y1="20" x2="12" y2="4" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round"/><line x1="6" y1="20" x2="6" y2="14" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round"/></svg><span class="nav-label" style="color:#6366f1">Stats</span><div class="nav-dot"></div></a>
+      <a class="nav-item" href="profile.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="rgba(255,255,255,0.28)" stroke-width="1.5"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round"/></svg><span class="nav-label">Profile</span><div class="nav-dot"></div></a>
+    </div>
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+<script>
+  function updateClock(){var n=new Date(),h=n.getHours().toString().padStart(2,'0'),m=n.getMinutes().toString().padStart(2,'0');document.getElementById('clock').textContent=h+':'+m;}
+  updateClock();setInterval(updateClock,1000);
+  function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+
+  // Bar chart data
+  var weekData=[
+    {day:'Mon',val:7,max:10,color:'#6366f1'},
+    {day:'Tue',val:9,max:10,color:'#818cf8'},
+    {day:'Wed',val:5,max:10,color:'#6366f1'},
+    {day:'Thu',val:8,max:10,color:'#818cf8'},
+    {day:'Fri',val:10,max:10,color:'#34d399'},
+    {day:'Sat',val:6,max:10,color:'#6366f1'},
+    {day:'Sun',val:4,max:10,color:'#6366f1'},
+  ];
+  var bc=document.getElementById('bar-chart');
+  weekData.forEach(function(d){
+    var pct=Math.round(d.val/d.max*100);
+    bc.innerHTML+='<div class="bar-row"><div class="bar-day">'+d.day+'</div><div class="bar-track"><div class="bar-fill" style="width:0%;background:'+d.color+'" data-w="'+pct+'%"></div></div><div class="bar-val">'+d.val+'</div></div>';
+  });
+  setTimeout(function(){
+    document.querySelectorAll('.bar-fill').forEach(function(el){el.style.width=el.getAttribute('data-w');});
+  },200);
+
+  // Calendar
+  var cal=document.getElementById('cal-grid');
+  var states=['cal-miss','cal-done','cal-great','cal-done','cal-great','cal-done','cal-miss','cal-done','cal-great','cal-done','cal-done','cal-miss','cal-great'];
+  // April 2026: starts on Wednesday (index 3)
+  for(var i=0;i<3;i++) cal.innerHTML+='<div class="cal-day cal-future"></div>';
+  for(var d=1;d<=30;d++){
+    var cls;
+    if(d===13) cls='cal-today';
+    else if(d>13) cls='cal-future';
+    else cls=states[(d-1)%states.length];
+    cal.innerHTML+='<div class="cal-day '+cls+'">'+d+'</div>';
+  }
+
+  // Period switcher
+  var periodData={
+    week:{num:'84%',sg1:'42',sg2:'35',sg3:'7',sg4:'5🔥',change:'▲ +12% from last week'},
+    month:{num:'79%',sg1:'168',sg2:'133',sg3:'35',sg4:'12🔥',change:'▲ +6% from last month'},
+    year:{num:'73%',sg1:'1240',sg2:'905',sg3:'335',sg4:'28🔥',change:'▲ +18% from last year'},
+  };
+  function switchPeriod(el,p){
+    document.querySelectorAll('.ptab').forEach(function(t){t.classList.remove('active');});
+    el.classList.add('active');
+    var d=periodData[p];
+    document.getElementById('big-num').textContent=d.num;
+    document.getElementById('sg1').textContent=d.sg1;
+    document.getElementById('sg2').textContent=d.sg2;
+    document.getElementById('sg3').textContent=d.sg3;
+    document.getElementById('sg4').textContent=d.sg4;
+  }
+</script>
+</body>
+</html>
